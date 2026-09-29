@@ -66,4 +66,4 @@ bash scripts/make-release.sh 2.0.0        # 维护者：打包 release
 
 ## License
 
-MIT。发布仓库时可在 GitHub 创建仓库的同时选择 MIT License。
+MIT。
