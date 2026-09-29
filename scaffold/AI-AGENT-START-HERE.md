@@ -28,6 +28,8 @@
 | 需要人拍板 | 追加到 `agent-knowledge/onboarding/open-questions-awaiting-human.md` |
 | 影响面分析 | 使用 ripgrep（`rg`）：`rg -n -F '[[文件名' .`，包括代码意图块 |
 
+影响面搜索需要系统已安装 ripgrep（`rg`）；不要用 `grep` 替代。
+
 ## 硬规则
 
 - 改代码时同步相关功能规格与测试。

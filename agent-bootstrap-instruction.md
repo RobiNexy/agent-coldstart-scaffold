@@ -6,7 +6,7 @@
 
 项目内应有 `agent-coldstart-scaffold/`（或 release.tar.gz）。
 
-- 若是 tar.gz，先解压得到目录。
+- 若是 tar.gz，在项目根目录解压下载的那个文件（例如 `tar -xzf agent-coldstart-scaffold-2.0.0.tar.gz`），确认得到 `agent-coldstart-scaffold/`。
 - 若都没有，向我确认下载来源后再获取。
 - 执行：`bash agent-coldstart-scaffold/install.sh .`
 
@@ -34,5 +34,6 @@
 ## 阶段 6：收尾
 
 1. 询问我脚手架目录 `agent-coldstart-scaffold/` 要删除还是保留；若保留，将其加入 `.gitignore`。
-2. 提交 git（首次提交）。
-3. 执行 `workflow-rules-for-ai-agent.md` 中的会话结束协议。
+2. 若本次通过 tar.gz 安装，确认压缩包不会被误提交：默认删除；若我要求保留，将该文件加入 `.gitignore`。
+3. 提交 git（首次提交）。
+4. 执行 `workflow-rules-for-ai-agent.md` 中的会话结束协议。

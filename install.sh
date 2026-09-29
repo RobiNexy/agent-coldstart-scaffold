@@ -4,6 +4,7 @@
 #
 # 用途: 将 AI Native 工作流知识库脚手架安装到目标项目
 # 特性: 幂等安装（永不覆盖）、只读校验、重跑补齐新增文件
+# 版本戳: 记录首次安装版本；遵循永不覆盖，不随重跑更新
 # 环境要求: bash 3.2+ 与常见 Unix 工具
 # 退出码: 0 成功 / 1 校验有缺失 / 2 参数或环境错误
 # =============================================================
@@ -18,6 +19,28 @@ fi
 
 die() { echo "错误: $*" >&2; exit 2; }
 
+has_symlink_parent() {
+  local rel_path="$1"
+  local parent_rel current component
+  case "$rel_path" in
+    */*) parent_rel="${rel_path%/*}" ;;
+    *) return 1 ;;
+  esac
+
+  current="$TARGET"
+  while [ -n "$parent_rel" ]; do
+    component="${parent_rel%%/*}"
+    if [ "$parent_rel" = "$component" ]; then
+      parent_rel=""
+    else
+      parent_rel="${parent_rel#*/}"
+    fi
+    current="${current}/${component}"
+    [ -L "$current" ] && return 0
+  done
+  return 1
+}
+
 usage() {
   cat <<'USAGE'
 用法: bash install.sh [选项] [目标目录]
@@ -31,8 +54,8 @@ usage() {
   -h, --help          显示本帮助
 
 示例:
-  bash install.sh .                              # 安装到当前项目
-  bash install.sh --verify .                     # 校验当前项目
+  bash install.sh /path/to/project               # 安装到目标项目
+  bash install.sh --verify /path/to/project      # 校验目标项目
   bash ~/tools/agent-coldstart-scaffold/install.sh /path/to/project
 USAGE
 }
@@ -74,30 +97,42 @@ created=0
 skipped=0
 present=0
 missing=0
-version_just_created=0
+conflicts=0
+total=0
 
 # find 在进程替换中执行；NUL 分隔可安全处理包含空格的路径。
 while IFS= read -r -d '' rel; do
   rel="${rel#./}"
   dst="${TARGET}/${rel}"
+  total=$((total + 1))
 
   if [ "$MODE" = "install" ]; then
-    if [ -e "$dst" ] || [ -L "$dst" ]; then
+    if has_symlink_parent "$rel"; then
+      echo "  CONFLICT ${rel}（父路径是符号链接，拒绝写出目标目录）" >&2
+      conflicts=$((conflicts + 1))
+    elif [ -f "$dst" ]; then
       echo "  SKIP    ${rel}"
       skipped=$((skipped + 1))
       if [ "$rel" = ".gitignore" ]; then
         echo "          └ 目标已有 .gitignore，请人工确认包含依赖/构建产物条目"
       fi
+    elif [ -e "$dst" ] || [ -L "$dst" ]; then
+      echo "  CONFLICT ${rel}（目标路径存在但不是普通文件，未覆盖）" >&2
+      conflicts=$((conflicts + 1))
     else
-      mkdir -p "$(dirname "$dst")"
-      cp "${SCAFFOLD_DIR}/${rel}" "$dst"
+      mkdir -p "$(dirname "$dst")" || die "无法创建目标目录: $(dirname "$dst")"
+      cp "${SCAFFOLD_DIR}/${rel}" "$dst" || die "无法复制资产: ${rel}"
       echo "  OK      ${rel}"
       created=$((created + 1))
       if [ "$rel" = "$VERSION_FILE" ]; then
-        version_just_created=1
+        printf 'installed-at: %s\n' "$(date +%F)" >> "$dst" \
+          || die "无法写入安装日期: ${rel}"
       fi
     fi
-  elif [ -e "$dst" ] || [ -L "$dst" ]; then
+  elif has_symlink_parent "$rel"; then
+    echo "  MISSING ${rel}（父路径是符号链接）"
+    missing=$((missing + 1))
+  elif [ -f "$dst" ]; then
     present=$((present + 1))
   else
     echo "  MISSING ${rel}"
@@ -106,12 +141,14 @@ while IFS= read -r -d '' rel; do
 done < <(cd "$SCAFFOLD_DIR" && find . -type f -print0)
 
 if [ "$MODE" = "install" ]; then
-  if [ "$version_just_created" -eq 1 ]; then
-    printf 'installed-at: %s\n' "$(date +%F)" >> "${TARGET}/${VERSION_FILE}"
+  if [ "$conflicts" -gt 0 ]; then
+    die "发现 ${conflicts} 个目标路径冲突；请先处理冲突后重跑安装器"
   fi
 
-  if [ ! -d "${TARGET}/.git" ] && command -v git >/dev/null 2>&1; then
-    git -C "$TARGET" init -q && echo "  OK      git 仓库已初始化"
+  if command -v git >/dev/null 2>&1 \
+    && ! git -C "$TARGET" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+    git -C "$TARGET" init -q || die "无法在目标目录初始化 git 仓库"
+    echo "  OK      git 仓库已初始化"
   fi
 
   echo ""
@@ -127,13 +164,13 @@ fi
 echo ""
 echo "============================================================"
 if [ "$missing" -eq 0 ]; then
-  echo " 校验通过: ${present}/${present} 文件就位 ✓"
+  echo " 校验通过: ${present}/${total} 文件就位 ✓"
   if [ -f "${SCAFFOLD_DIR}/${VERSION_FILE}" ] && [ -f "${TARGET}/${VERSION_FILE}" ]; then
     local_ver="$(head -n 1 "${SCAFFOLD_DIR}/${VERSION_FILE}")"
     inst_ver="$(head -n 1 "${TARGET}/${VERSION_FILE}")"
     if [ "$local_ver" != "$inst_ver" ]; then
-      echo " 版本提示: 当前脚手架 ${local_ver}, 项目内为 ${inst_ver}"
-      echo "           重跑安装器只会补齐缺失文件，不会覆盖已有文件。"
+      echo " 版本提示: 当前资产 ${local_ver}, 项目记录的首次安装版本为 ${inst_ver}"
+      echo "           安装器只补齐缺失文件，不覆盖已有文件；版本戳保留首次安装版本。"
     fi
   fi
   echo "============================================================"

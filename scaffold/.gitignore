@@ -1,26 +1,11 @@
-# Dependencies
-node_modules/
-vendor/
-
-# Build output
-dist/
-build/
-coverage/
-.next/
-
 # Environment secrets
 .env
 .env.*
 !.env.example
 
-# Logs and temporary files
+# Common local artifacts
 *.log
-.cache/
-tmp/
-temp/
-
-# OS / editor files
 .DS_Store
 Thumbs.db
-.idea/
-.vscode/
+
+# Add dependency/build output patterns after the project's technology stack is chosen.

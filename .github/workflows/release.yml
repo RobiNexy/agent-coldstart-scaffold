@@ -1,0 +1,86 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Build and publish release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out tagged commit
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Validate tag and scaffold version
+        shell: bash
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+
+          if [[ ! "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?(\+[0-9A-Za-z.-]+)?$ ]]; then
+            echo "Invalid release tag: $TAG" >&2
+            exit 1
+          fi
+
+          tag_version="${TAG#v}"
+          scaffold_version="$(head -n 1 scaffold/agent-knowledge/scaffold-version.txt)"
+          if [ "$tag_version" != "$scaffold_version" ]; then
+            echo "Tag version ($tag_version) does not match scaffold version ($scaffold_version)." >&2
+            exit 1
+          fi
+
+      - name: Build release archive
+        id: package
+        shell: bash
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+
+          version="${TAG#v}"
+          archive="dist/agent-coldstart-scaffold-${version}.tar.gz"
+          mkdir -p dist
+
+          git archive --format=tar --prefix=agent-coldstart-scaffold/ "$GITHUB_SHA" \
+            | gzip -n > "$archive"
+
+          while IFS= read -r path; do
+            case "$path" in
+              agent-coldstart-scaffold/*) ;;
+              *) echo "Unexpected archive path: $path" >&2; exit 1 ;;
+            esac
+            case "$path" in
+              agent-coldstart-scaffold/.git|agent-coldstart-scaffold/.git/*|agent-coldstart-scaffold/dist|agent-coldstart-scaffold/dist/*)
+                echo "Unexpected generated path in archive: $path" >&2
+                exit 1
+                ;;
+            esac
+          done < <(tar -tzf "$archive")
+
+          echo "archive=$archive" >> "$GITHUB_OUTPUT"
+
+      - name: Create or update GitHub Release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+          ARCHIVE: ${{ steps.package.outputs.archive }}
+        run: |
+          set -euo pipefail
+
+          if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release upload "$TAG" "$ARCHIVE" --clobber --repo "$GITHUB_REPOSITORY"
+          else
+            gh release create "$TAG" "$ARCHIVE" \
+              --verify-tag \
+              --generate-notes \
+              --repo "$GITHUB_REPOSITORY"
+          fi

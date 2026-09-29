@@ -15,22 +15,23 @@
 **新项目**
 
 ```bash
-git clone https://github.com/<you>/agent-coldstart-scaffold /tmp/acs
+git clone https://github.com/RobiNexy/agent-coldstart-scaffold /tmp/acs
 mkdir -p /path/to/your-new-project
 bash /tmp/acs/install.sh /path/to/your-new-project
 ```
 
 **让 Agent 安装**
 
-下载 release.tar.gz 并放入项目根目录，然后将仓库中的 `agent-bootstrap-instruction.md` 发给 Agent。
+发布版本后，从 [GitHub Releases](https://github.com/RobiNexy/agent-coldstart-scaffold/releases) 下载 release.tar.gz 并放入项目根目录，解压后将其中的 `agent-bootstrap-instruction.md` 发给 Agent。成功安装后不要把压缩包提交到项目，可删除或加入 `.gitignore`。
 
 **已有项目补装**
 
 ```bash
-bash install.sh .
+git clone https://github.com/RobiNexy/agent-coldstart-scaffold /tmp/acs
+bash /tmp/acs/install.sh /path/to/existing-project
 ```
 
-安装器幂等运行：已存在的文件不会覆盖，新资产会补齐。已有 `.gitignore` 时请人工合并所需条目。
+安装器幂等运行：已存在的文件不会覆盖，新资产会补齐。已有 `.gitignore` 时请人工合并所需条目。`--verify` 检查必需路径是否为文件，并仅对版本戳首行做提示性比较；不会校验其他文件内容，用户对资产的修改会保留。版本戳记录首次安装版本；重跑不会改写版本戳，因此新旧版本不同时 `--verify` 会持续提示基线版本差异。
 
 ## 安装后你会得到
 
@@ -45,12 +46,18 @@ agent-knowledge/
 └── operations-runbook/             # 运维手册与模板
 ```
 
+## 环境要求
+
+- 安装器：Bash 3.2+ 与常见 Unix 工具；若目标目录尚未处于 Git 工作区且系统有 Git，安装器会初始化 Git 仓库。
+- 发版：推送符合版本戳的 `v*` tag，由 GitHub Actions 自动构建 tar.gz 并创建 GitHub Release。
+- 知识库搜索：使用 ripgrep（`rg`）。macOS 可用 `brew install ripgrep` 安装。
+
 ## 命令参考
 
 ```bash
-bash install.sh .                         # 安装（幂等，不覆盖已有文件）
-bash install.sh --verify .                # 只读校验安装完整性
-bash scripts/make-release.sh 2.0.0        # 维护者：打包 release
+bash /tmp/acs/install.sh /path/to/project          # 安装（幂等，不覆盖已有文件）
+bash /tmp/acs/install.sh --verify /path/to/project # 只读校验安装完整性
+git tag v2.0.0 && git push origin v2.0.0           # 版本戳与 CHANGELOG 已提交后触发自动发版
 ```
 
 ## 核心机制
@@ -62,8 +69,14 @@ bash scripts/make-release.sh 2.0.0        # 维护者：打包 release
 
 ## 设计文档
 
-见 [`docs/AI-native-single-developer-workflow-v2.md`](docs/AI-native-single-developer-workflow-v2.md)。
+见 [`docs/AI-native-single-developer-workflow-v2.md`](docs/AI-native-single-developer-workflow-v2.md)（设计概要）。
+
+发布历史见 [`CHANGELOG.md`](CHANGELOG.md)。
+
+## 发版
+
+先更新 `CHANGELOG.md` 和 `scaffold/agent-knowledge/scaffold-version.txt`，将两者提交并推送；版本戳首行必须与 tag 去掉 `v` 后一致。随后推送 tag，例如 `git tag v2.1.0 && git push origin v2.1.0`。`.github/workflows/release.yml` 会校验版本、从 tag 对应提交创建带 `agent-coldstart-scaffold/` 顶层目录的 tar.gz，并自动创建或更新 GitHub Release。
 
 ## License
 
-MIT。
+MIT，见 [`LICENSE`](LICENSE)。

@@ -1,6 +1,6 @@
 # AI Native 单人全栈项目工作流设计（v2）
 
-> 版本：v2 存档版
+> 版本：v2 设计概要（不是逐字存档）
 > 适用：单人开发者 + Coding Agent（LLM）长期维护全栈项目
 
 ## v1 → v2 变更摘要
@@ -24,7 +24,7 @@
 ## 二、命名原则
 
 1. 目录名说明用途，文件名表达结论；可以长，不能含糊。
-2. 知识文件名是全局唯一 ID，使用 kebab-case。
+2. 根入口与 `agent-knowledge/` 中的知识文件名组成全局唯一 ID，使用 kebab-case。
 3. 禁止 snake_case、CamelCase、隐藏目录中的知识资产。
 4. 唯一大写例外是根目录入口 `AI-AGENT-START-HERE.md`。
 
@@ -49,16 +49,16 @@
 
 ## 四、统一引用 `[[...]]`
 
-语法为 `[[filename]]` 或 `[[filename|显示文字]]`，不带路径和扩展名。文档到文档、代码到文档都用该格式；文档引用代码使用带路径的行内代码；代码到代码使用语言原生 import。
+语法为 `[[filename]]` 或 `[[filename|显示文字]]`，不带路径和扩展名。目标必须唯一：知识文件在 `agent-knowledge/` 下，唯一的根目录例外是 `AI-AGENT-START-HERE.md`。文档到文档、代码到文档都用该格式；文档引用代码使用带路径的行内代码；代码到代码使用语言原生 import。
 
 不使用 aliases、block references、embed 或标签。反向查找统一使用 ripgrep（`rg`）：
 
 ```bash
-rg -n -F '[[0003-use-redis-optimistic-lock' .
+rg -n -F '[[0003-use-redis-optimistic-lock' AI-AGENT-START-HERE.md agent-knowledge/ src/
 rg -n -F '[[' src/
 ```
 
-文件重命名时全局更新引用；会话结束时检查本次涉及文件的悬空链接，整理时进行全量检查。
+文件重命名时全局更新引用；会话结束时检查本次涉及文件的悬空链接，整理时进行全量检查。模板中的 `[[相关文件名]]` 是占位符，实例化模板时必须替换为真实目标或删除。
 
 ## 五、代码意图块
 
@@ -136,3 +136,5 @@ rg -n -F '[[' src/
 - 文档也服务于未来遗忘的自己，入口文件是冷启动的固定门牌。
 
 新项目启动顺序：创建知识目录；起草入口和工作流规则；由人类填写目的与边界；建立状态、看板、悬决问题和术语文件；初始化并提交 git；验证新会话能正确简报；再开始最小垂直切片。人类必须原创的核心内容只有项目方向与边界、关键决策的裁决，其余可由 LLM 起草并经 review。
+
+仓库发版时，更新并提交 CHANGELOG 与 `scaffold-version.txt`，推送与版本戳匹配的 `v*` tag；GitHub Actions 从 tag 对应提交生成带固定顶层目录的 release tarball 并发布 GitHub Release。
