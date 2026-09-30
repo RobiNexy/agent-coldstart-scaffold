@@ -6,13 +6,14 @@
 
 项目内应有 `agent-coldstart-scaffold/`（或 release.tar.gz）。
 
-- 若是 tar.gz，在项目根目录解压下载的那个文件（例如 `tar -xzf agent-coldstart-scaffold-2.0.0.tar.gz`），确认得到 `agent-coldstart-scaffold/`。
+- 若是 tar.gz，在项目根目录解压下载的那个文件（例如 `tar -xzf agent-coldstart-scaffold-3.0.0.tar.gz`），确认得到 `agent-coldstart-scaffold/`。
 - 若都没有，向我确认下载来源后再获取。
-- 执行：`bash agent-coldstart-scaffold/install.sh .`
+- Windows（PowerShell 7.x）：执行 `pwsh -File .\agent-coldstart-scaffold\install.ps1 -TargetDir .`。
+- Unix：执行 `bash agent-coldstart-scaffold/install.sh .`。
 
 ## 阶段 2：自检并报告
 
-执行 `bash agent-coldstart-scaffold/install.sh --verify .`，向我报告结果。若有缺失，先修复再报告。
+Windows 执行 `pwsh -File .\agent-coldstart-scaffold\install.ps1 -Verify -TargetDir .`；Unix 执行 `bash agent-coldstart-scaffold/install.sh --verify .`。向我报告结果。若有缺失，先修复再报告。
 
 ## 阶段 3：加载上下文
 
@@ -30,6 +31,7 @@
 2. 与我确认技术栈；我拍板后按 `_TEMPLATE-adr.md` 写 ADR-0001，文件名包含结论。
 3. 补全 `coding-conventions-project-specific.md` 的“强制约束”部分。
 4. 在 `task-board.md` 的 Backlog 写下第一批粗粒度任务，开工时再拆解。
+5. 不生成或修改能力包、路由表；它们由人类手工维护。没有匹配能力包时使用基础能力，并按工作流规则记录无匹配事件。
 
 ## 阶段 6：收尾
 
