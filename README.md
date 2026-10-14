@@ -53,15 +53,18 @@ pwsh -File "$env:TEMP\acs\install.ps1" -Verify -TargetDir 'C:\path\to\existing-p
 
 ```text
 AI-AGENT-START-HERE.md              # Agent 的唯一入口
-agent-knowledge/
-├── onboarding/                     # 状态、看板、规则、术语与悬决问题
-├── capability-prompts/             # 人类维护的能力路由与激活日志
-├── feature-specifications/         # 功能规格与模板
-├── api-contracts/                  # API 契约与模板
-├── data-model-specifications/      # 数据模型与模板
-├── architectural-decision-records/ # ADR 与模板
-└── operations-runbook/             # 运维手册与模板
+├── agent-knowledge/
+│   ├── onboarding/                 # 状态、看板、规则、术语与悬决问题
+│   ├── capability-prompts/         # 人类维护的能力路由与激活日志
+│   ├── feature-specifications/     # 功能规格与模板
+│   ├── api-contracts/              # API 契约与模板
+│   ├── data-model-specifications/  # 数据模型与模板
+│   ├── architectural-decision-records/ # ADR 与模板
+│   └── operations-runbook/         # 运维手册与模板
+└── human_files/                    # 人类提供给 LLM 的原始材料（按需读取）
 ```
+
+`human_files/` 用于存放人类交给 LLM 的文档、需求和其他原始材料。Agent 按任务定向读取并默认只读；需要沉淀的结论写入对应知识文件，以路径/标题锚点引用来源。大段文本迁移采用稳定锚点和紧凑映射，避免在索引文件、对话或多个文档中重复全文。
 
 能力包正文由人类通过元提示词工作流制作和维护；脚手架只提供路由说明与激活日志，不附带、生成或格式化能力包。LLM 对能力包及路由表只读；激活日志常态追加，熵增整理时按规则压缩归档。
 
