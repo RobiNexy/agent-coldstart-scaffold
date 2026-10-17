@@ -18,7 +18,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Validate tag and scaffold version
+      - name: Validate tag
         shell: bash
         env:
           TAG: ${{ github.ref_name }}
@@ -27,13 +27,6 @@ jobs:
 
           if [[ ! "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?(\+[0-9A-Za-z.-]+)?$ ]]; then
             echo "Invalid release tag: $TAG" >&2
-            exit 1
-          fi
-
-          tag_version="${TAG#v}"
-          scaffold_version="$(head -n 1 scaffold/agent-knowledge/scaffold-version.txt)"
-          if [ "$tag_version" != "$scaffold_version" ]; then
-            echo "Tag version ($tag_version) does not match scaffold version ($scaffold_version)." >&2
             exit 1
           fi
 

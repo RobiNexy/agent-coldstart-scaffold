@@ -16,9 +16,6 @@ Only verify that every scaffold asset is present as a file.
 .PARAMETER ScaffoldDir
 Override the asset directory. Defaults to scaffold/ beside this script.
 
-.PARAMETER ShowVersion
-Print the version from scaffold/agent-knowledge/scaffold-version.txt.
-
 .EXAMPLE
 pwsh -File .\install.ps1 -TargetDir C:\work\my-project
 
@@ -32,13 +29,10 @@ param(
 
     [switch] $Verify,
 
-    [string] $ScaffoldDir,
-
-    [switch] $ShowVersion
+    [string] $ScaffoldDir
 )
 
 $ErrorActionPreference = 'Stop'
-$versionRelativePath = 'agent-knowledge/scaffold-version.txt'
 
 function Stop-Installer {
     param(
@@ -50,6 +44,7 @@ function Stop-Installer {
     exit $ExitCode
 }
 
+# 若相对路径的任一父路径是重解析点（符号链接/联结），返回 $true。
 function Test-SymlinkAncestor {
     param(
         [Parameter(Mandatory)] [string] $RelativePath,
@@ -86,9 +81,6 @@ function Test-SymlinkAncestor {
 if ($PSVersionTable.PSVersion.Major -ne 7) {
     Stop-Installer "需要 PowerShell 7.x（pwsh）；当前版本为 $($PSVersionTable.PSVersion)。Windows PowerShell 5.1 和其他主版本不受支持。"
 }
-if ($Verify -and $ShowVersion) {
-    Stop-Installer '-Verify 与 -ShowVersion 不能同时使用。'
-}
 
 if ([string]::IsNullOrWhiteSpace($ScaffoldDir)) {
     $ScaffoldDir = Join-Path -Path $PSScriptRoot -ChildPath 'scaffold'
@@ -101,19 +93,6 @@ catch {
 }
 if (-not (Test-Path -LiteralPath $scaffoldPath -PathType Container)) {
     Stop-Installer "资产路径不是目录: $scaffoldPath"
-}
-
-$versionFile = Join-Path -Path $scaffoldPath -ChildPath $versionRelativePath
-$scaffoldVersion = 'unknown'
-if (Test-Path -LiteralPath $versionFile -PathType Leaf) {
-    $versionLine = Get-Content -LiteralPath $versionFile -TotalCount 1
-    if (-not [string]::IsNullOrWhiteSpace($versionLine)) {
-        $scaffoldVersion = $versionLine.Trim()
-    }
-}
-if ($ShowVersion) {
-    Write-Output "agent-coldstart-scaffold installer $scaffoldVersion (PowerShell 7.x)"
-    exit 0
 }
 
 try {
@@ -148,7 +127,6 @@ $directorySeparator = [System.IO.Path]::DirectorySeparatorChar.ToString()
 foreach ($asset in $assets) {
     $relativePath = [System.IO.Path]::GetRelativePath($scaffoldPath, $asset.FullName)
     $relativePath = $relativePath.Replace('/', $directorySeparator)
-    $normalizedRelativePath = $relativePath.Replace($directorySeparator, '/')
     $destination = Join-Path -Path $targetPath -ChildPath $relativePath
     $total++
 
@@ -203,17 +181,6 @@ foreach ($asset in $assets) {
             $null = New-Item -ItemType Directory -Path $destinationParent -Force -ErrorAction Stop
         }
         Copy-Item -LiteralPath $asset.FullName -Destination $destination -ErrorAction Stop
-
-        if ($normalizedRelativePath -eq $versionRelativePath) {
-            $installedAt = (Get-Date).ToString('yyyy-MM-dd', [System.Globalization.CultureInfo]::InvariantCulture)
-            $lineEnding = [System.Environment]::NewLine
-            $encoding = [System.Text.UTF8Encoding]::new($false)
-            [System.IO.File]::AppendAllText(
-                $destination,
-                "installed-at: $installedAt$lineEnding",
-                $encoding
-            )
-        }
     }
     catch {
         Stop-Installer "无法安装资产 '$relativePath': $($_.Exception.Message)"
@@ -258,7 +225,7 @@ if (-not $Verify) {
     Write-Host '============================================================'
     Write-Host " 安装完成: 新建 $created 个文件, 跳过 $skipped 个已存在文件"
     Write-Host ' 下一步: 将 agent-bootstrap-instruction.md 的内容发给你的 Agent'
-    Write-Host ' 脚手架目录可删除；校验或补齐时重新下载并重跑安装器。'
+    Write-Host ' 脚手架目录可删除；需要补齐时重新下载并重跑安装器即可。'
     Write-Host '============================================================'
     exit 0
 }
@@ -266,25 +233,12 @@ if (-not $Verify) {
 Write-Host ''
 Write-Host '============================================================'
 if ($missing -eq 0) {
-    Write-Host " 校验通过: $present/$total 文件就位 ✓"
-    $targetVersionFile = Join-Path -Path $targetPath -ChildPath $versionRelativePath
-    if ((Test-Path -LiteralPath $versionFile -PathType Leaf) -and
-        (Test-Path -LiteralPath $targetVersionFile -PathType Leaf)) {
-        $installedVersion = 'unknown'
-        $installedVersionLine = Get-Content -LiteralPath $targetVersionFile -TotalCount 1
-        if (-not [string]::IsNullOrWhiteSpace($installedVersionLine)) {
-            $installedVersion = $installedVersionLine.Trim()
-        }
-        if ($scaffoldVersion -ne $installedVersion) {
-            Write-Host " 版本提示: 当前资产 $scaffoldVersion, 项目记录的首次安装版本为 $installedVersion"
-            Write-Host '           安装器只补齐缺失文件，不覆盖已有文件；版本戳保留首次安装版本。'
-        }
-    }
+    Write-Host " 校验通过: $present/$total 文件就位"
     Write-Host '============================================================'
     exit 0
 }
 
-Write-Host " 校验失败: $present 就位, $missing 缺失 ✗"
+Write-Host " 校验失败: $present 就位, $missing 缺失"
 Write-Host " 修复方法: pwsh -File `"$PSCommandPath`" -TargetDir `"$targetPath`""
 Write-Host '============================================================'
 exit 1
