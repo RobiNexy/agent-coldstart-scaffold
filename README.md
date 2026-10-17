@@ -1,115 +1,93 @@
 # agent-coldstart-scaffold
 
-单人全栈项目的 AI Native 工作流脚手架（v3）。
+单人全栈项目的 AI Native 工作流脚手架（v4.1）。
 
-一次安装，让新开的 LLM 会话快速接手项目：读取固定入口、简报项目状态，再从任务看板继续工作。
+一次安装，让新开的 LLM 会话快速接手项目：从 `00__AGENT_START_HERE.md` 进入，加载底座，读取当前状态，再从任务看板继续工作。
 
-## 它解决什么问题
+## 解决什么问题
 
-单人 + Coding Agent 开发时，主要成本往往不是写代码，而是每次会话重新解释项目、需求/规格/代码逐渐漂移，以及人类无法逐项阅读 Agent 的全部产出。
+单人 + Coding Agent 开发时，主要成本往往不是写代码，而是每次会话重新解释项目、需求与代码逐渐漂移，以及人类无法逐项阅读 Agent 的全部产出。
 
-本脚手架用入口文件、启动盘、任务看板、ADR、统一 `[[文件名]]` 引用和会话结束协议，帮助项目保持自解释。
+脚手架用目录结构承载工作流（相信 `ls`，不要记忆），用"设计昂贵，代码便宜"的分层让设计先于代码，用 `[[文件名]]` 双链与意图块保持可追溯。
 
 ## 快速开始
 
-**新项目**
+**新项目或已有项目**（目标目录须已存在）：
 
 ```bash
 git clone https://github.com/RobiNexy/agent-coldstart-scaffold /tmp/acs
-mkdir -p /path/to/your-new-project
-bash /tmp/acs/install.sh /path/to/your-new-project
+bash /tmp/acs/install.sh /path/to/your-project
 ```
 
-**Windows（仅 PowerShell 7 / `pwsh`）**
+**Windows（仅 PowerShell 7.x）**：
 
 ```powershell
 git clone https://github.com/RobiNexy/agent-coldstart-scaffold "$env:TEMP\acs"
-New-Item -ItemType Directory -Force -Path 'C:\path\to\your-new-project' | Out-Null
-pwsh -File "$env:TEMP\acs\install.ps1" -TargetDir 'C:\path\to\your-new-project'
+pwsh -File "$env:TEMP\acs\install.ps1" -TargetDir 'C:\path\to\your-project'
 ```
 
-**让 Agent 安装**
+安装完成后，把 `agent-bootstrap-instruction.md` 的内容发给你的 Agent。
 
-发布版本后，从 [GitHub Releases](https://github.com/RobiNexy/agent-coldstart-scaffold/releases) 下载 release.tar.gz 并放入项目根目录，解压后将其中的 `agent-bootstrap-instruction.md` 发给 Agent。成功安装后不要把压缩包提交到项目，可删除或加入 `.gitignore`。
+**让 Agent 安装**：从 [GitHub Releases](https://github.com/RobiNexy/agent-coldstart-scaffold/releases) 下载 `agent-coldstart-scaffold-<版本>.tar.gz` 放入项目根目录并解压，然后将解压后的 `agent-bootstrap-instruction.md` 发给 Agent。安装成功后，压缩包不应提交到项目，可删除或加入 `.gitignore`。
 
-**已有项目补装**
+## 命令
 
 ```bash
-git clone https://github.com/RobiNexy/agent-coldstart-scaffold /tmp/acs
-bash /tmp/acs/install.sh /path/to/existing-project
+bash install.sh [目标目录]                 # 安装（幂等，不覆盖已有文件）
+bash install.sh --verify [目标目录]        # 只读校验资产文件是否就位
+bash install.sh --scaffold-dir DIR [目标目录]  # 指定资产目录
 ```
-
-Windows 下将目标目录传给 PowerShell 安装器：
-
-```powershell
-git clone https://github.com/RobiNexy/agent-coldstart-scaffold "$env:TEMP\acs"
-pwsh -File "$env:TEMP\acs\install.ps1" -TargetDir 'C:\path\to\existing-project'
-pwsh -File "$env:TEMP\acs\install.ps1" -Verify -TargetDir 'C:\path\to\existing-project'
-```
-
-安装器幂等运行：已存在的文件不会覆盖，新资产会补齐。已有 `.gitignore` 时请人工合并所需条目。`--verify` 检查必需路径是否为文件，并仅对版本戳首行做提示性比较；不会校验其他文件内容，用户对资产的修改会保留。版本戳记录首次安装版本；重跑不会改写版本戳，因此新旧版本不同时 `--verify` 会持续提示基线版本差异。
-
-## 安装后你会得到
-
-```text
-AI-AGENT-START-HERE.md              # Agent 的唯一入口
-├── agent-knowledge/
-│   ├── onboarding/                 # 状态、看板、规则、术语与悬决问题
-│   ├── capability-prompts/         # 人类维护的能力路由与激活日志
-│   ├── feature-specifications/     # 功能规格与模板
-│   ├── api-contracts/              # API 契约与模板
-│   ├── data-model-specifications/  # 数据模型与模板
-│   ├── architectural-decision-records/ # ADR 与模板
-│   └── operations-runbook/         # 运维手册与模板
-└── human_files/                    # 人类提供给 LLM 的原始材料（按需读取）
-```
-
-`human_files/` 用于存放人类交给 LLM 的文档、需求和其他原始材料。Agent 按任务定向读取并默认只读；需要沉淀的结论写入对应知识文件，以路径/标题锚点引用来源。大段文本迁移采用稳定锚点和紧凑映射，避免在索引文件、对话或多个文档中重复全文。
-
-能力包正文由人类通过元提示词工作流制作和维护；脚手架只提供路由说明与激活日志，不附带、生成或格式化能力包。LLM 对能力包及路由表只读；激活日志常态追加，熵增整理时按规则压缩归档。
-
-## 环境要求
-
-- Unix 安装器：Bash 3.2+ 与常见 Unix 工具。
-- Windows 安装器：PowerShell 7.x（`pwsh`，建议最新 7.x）；不支持 Windows PowerShell 5.1、其他主版本或 `.bat`。
-- 若目标目录尚未处于 Git 工作区且系统有 Git，安装器会初始化 Git 仓库。
-- 发版：推送符合版本戳的 `v*` tag，由 GitHub Actions 自动构建 tar.gz 并创建 GitHub Release。
-- 知识库搜索：使用 ripgrep（`rg`）。macOS 可用 `brew install ripgrep` 安装。
-
-## 命令参考
-
-```bash
-bash /tmp/acs/install.sh /path/to/project          # 安装（幂等，不覆盖已有文件）
-bash /tmp/acs/install.sh --verify /path/to/project # 只读校验安装完整性
-git tag v3.0.0 && git push origin v3.0.0           # 版本戳与 CHANGELOG 已提交后触发自动发版
-```
-
-Windows PowerShell 7.x（建议使用最新 7.x）：
 
 ```powershell
 pwsh -File .\install.ps1 -TargetDir 'C:\path\to\project'
 pwsh -File .\install.ps1 -Verify -TargetDir 'C:\path\to\project'
-pwsh -File .\install.ps1 -ShowVersion
 ```
 
-## 核心机制
+安装器只做两件事：补齐缺失文件，以及在目标目录不是 Git 仓库时执行 `git init`。已存在的文件一律跳过，包括 `.gitignore`；请人工合并所需条目。`--verify` 只检查文件存在性，不校验内容，用户对资产的修改会保留。
 
-1. **冷启动**：Agent 读 START-HERE 和 onboarding 必读文件，简报项目状态。
-2. **能力激活**：任务明确后按人类维护的路由表加载能力包；激活须确认，日志可观测。
-3. **验证门禁**：类型检查、测试和 lint 三绿；测试通过 `@spec` 回链到规格。
-4. **统一引用**：文档、代码和测试意图块使用 `[[文件名]]`；搜索统一使用 ripgrep（`rg`）。
-5. **会话结束协议**：更新状态、看板、激活日志和决策记录，减少上下文丢失。
-6. **人机接口**：人类提供高层意图、关键裁决、变更 review，以及能力包与路由表。
+## 安装后的结构
 
-## 设计文档
+```text
+00__AGENT_START_HERE.md                 Agent 的唯一入口
+10__ALWAYS_LOAD_FIRST/                  会话必读底座（心法、规则、约定、术语、项目边界）
+20__EDIT_BEFORE_SESSION_END/            会话结束必更新（状态、任务板、待裁决问题）
+30__DECISION_AND_DESIGN_ARE_EXPENSIVE/  设计资产与模板
+│   ├── 10__FEATURES/                   功能规格
+│   ├── 20__DECISIONS/                  ADR
+│   ├── 30__CONTRACTS/                  API 契约
+│   ├── 40__DATA_MODELS/                数据模型
+│   ├── 50__STRUCTURAL_DESIGNS/         时序 / 状态机 / 数据流 / 模块图（Mermaid）
+│   └── 60__OPERATIONS/                 运维手册
+40__CODING_IS_CHEAP/                    代码、测试、端到端场景
+50__HUMAN_SOURCE_DO_NOT_EDIT/           人类资料（LLM 只读，且仅在人类点名时读取）
+    └── capability-primers/             人类手工维护的视角材料
+```
 
-见 [`docs/AI-native-single-developer-workflow-v3.md`](docs/AI-native-single-developer-workflow-v3.md)（v3 设计存档）。
+模板文件以 `_TEMPLATE__` 开头，复制后改名为正式前缀（如 `FEATURE__`、`ADR__0001-`）。
 
-发布历史见 [`CHANGELOG.md`](CHANGELOG.md)。
+## 设计原则
+
+- 心法四条：相信 `ls`；设计昂贵，代码便宜；文件名即结论；人类是裁决者，不是打字员。
+- 任务完成的硬标准是三绿门禁：类型检查、测试、Lint 全部通过。
+- ADR 的一切动作都需要人类拍板；已 Accepted 的 ADR 内容字段冻结。
+- 结构性设计使用 Mermaid，规范见 `10__ALWAYS_LOAD_FIRST/workflow_rules_for_ai.md` 第七节。
+
+## 环境要求
+
+- Unix 安装器：Bash 3.2+ 与常见 Unix 工具。
+- Windows 安装器：PowerShell 7.x（`pwsh`）；不支持 Windows PowerShell 5.1。
+- 知识库搜索：ripgrep（`rg`）。macOS 可用 `brew install ripgrep` 安装。
 
 ## 发版
 
-先更新 `CHANGELOG.md` 和 `scaffold/agent-knowledge/scaffold-version.txt`，将两者提交并推送；版本戳首行必须与 tag 去掉 `v` 后一致。随后推送 tag，例如 `git tag v3.0.0 && git push origin v3.0.0`。`.github/workflows/release.yml` 会校验版本、从 tag 对应提交创建带 `agent-coldstart-scaffold/` 顶层目录的 tar.gz，并自动创建或更新 GitHub Release。
+1. 更新 `CHANGELOG.md`，提交并推送。
+2. 打 tag 并推送：`git tag v4.1.0 && git push origin v4.1.0`。
+
+`.github/workflows/release.yml` 会校验 tag 格式，从该提交构建带 `agent-coldstart-scaffold/` 顶层目录的 tar.gz，并创建或更新 GitHub Release。
+
+## 设计文档
+
+`docs/` 中保存 v2、v3 的设计存档，仅供参考。v4 设计以 `10__ALWAYS_LOAD_FIRST/core_mindset.md` 与本 README 为准。
 
 ## License
 
