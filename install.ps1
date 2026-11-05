@@ -195,37 +195,10 @@ if (-not $Verify) {
         Stop-Installer "发现 $conflicts 个目标路径冲突；请先处理冲突后重跑安装器"
     }
 
-    $gitCommand = Get-Command -Name git -CommandType Application -ErrorAction SilentlyContinue |
-        Select-Object -First 1
-    if ($null -ne $gitCommand) {
-        $isGitWorktree = $false
-        try {
-            & $gitCommand.Source -C $targetPath rev-parse --is-inside-work-tree *> $null
-            $isGitWorktree = ($LASTEXITCODE -eq 0)
-        }
-        catch {
-            $isGitWorktree = $false
-        }
-
-        if (-not $isGitWorktree) {
-            try {
-                & $gitCommand.Source -C $targetPath init -q
-                if ($LASTEXITCODE -ne 0) {
-                    Stop-Installer "无法在目标目录初始化 git 仓库: $targetPath"
-                }
-                Write-Host '  OK      git 仓库已初始化'
-            }
-            catch {
-                Stop-Installer "无法在目标目录初始化 git 仓库: $($_.Exception.Message)"
-            }
-        }
-    }
-
     Write-Host ''
     Write-Host '============================================================'
     Write-Host " 安装完成: 新建 $created 个文件, 跳过 $skipped 个已存在文件"
-    Write-Host ' 下一步: 将 agent-bootstrap-instruction.md 的内容发给你的 Agent'
-    Write-Host ' 脚手架目录可删除；需要补齐时重新下载并重跑安装器即可。'
+    Write-Host ' 安装不会初始化 Git；需要模板时可从源码目录的 templates/ 按需复制。'
     Write-Host '============================================================'
     exit 0
 }

@@ -133,18 +133,11 @@ if [ "$MODE" = "install" ]; then
     die "发现 ${conflicts} 个目标路径冲突；请先处理冲突后重跑安装器"
   fi
 
-  if command -v git >/dev/null 2>&1 \
-    && ! git -C "$TARGET" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
-    git -C "$TARGET" init -q || die "无法在目标目录初始化 git 仓库"
-    echo "  OK      git 仓库已初始化"
-  fi
-
   echo ""
   echo "============================================================"
   echo " 安装完成: 新建 ${created} 个文件, 跳过 ${skipped} 个已存在文件"
   echo ""
-  echo " 下一步: 将 agent-bootstrap-instruction.md 的内容发给你的 Agent"
-  echo " 脚手架目录可删除；需要补齐时重新下载并重跑安装器即可。"
+  echo " 安装不会初始化 Git；需要模板时可从源码目录的 templates/ 按需复制。"
   echo "============================================================"
   exit 0
 fi
