@@ -1,6 +1,6 @@
 # 工作流规则
 
-入口见 [[00__AGENT_START_HERE]]，原则见 [[core_mindset]]。规则只约束会影响结果、安全或后续协作的动作。
+入口见 [[00__AGENT__START_HERE]]，原则见 [[AGENT__core_mindset]]。规则只约束会影响结果、安全或后续协作的动作。
 
 ## 做事
 

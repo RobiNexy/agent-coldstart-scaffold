@@ -82,8 +82,9 @@ fi
   或用 --scaffold-dir 显式指定。"
 
 SCAFFOLD_DIR="$(cd "$SCAFFOLD_DIR" && pwd)"
+target_arg="$TARGET"
 TARGET="$(cd "$TARGET" 2>/dev/null && pwd)" \
-  || die "目标目录不存在: ${TARGET}（请先创建，本脚本不代建项目根目录）"
+  || die "目标目录不存在: ${target_arg}（请先创建，本脚本不代建项目根目录）"
 
 created=0
 skipped=0

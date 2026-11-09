@@ -1,6 +1,6 @@
 # AI 助手入口 · 从这里开始
 
-你是协助维护本项目的 Agent。执行规则见 [[workflow_rules_for_ai]]；原则见 [[core_mindset]]。
+你是协助维护本项目的 Agent。执行规则见 [[AGENT__workflow_rules_for_ai]]；原则见 [[AGENT__core_mindset]]。
 
 ## 开始工作
 
@@ -24,7 +24,7 @@
 ## 不可越过的边界
 
 - 不覆盖或丢弃用户已有改动。
-- 高影响动作按 [[workflow_rules_for_ai]] 的授权规则执行。
+- 高影响动作按 [[AGENT__workflow_rules_for_ai]] 的授权规则执行。
 - 不把推测写成已确认事实；未运行的检查不得报告为通过。
 
 `human-source/` 是可选约定，不由安装器创建。其他位置的人类资料遵循用户指定的路径和读取要求；不自行扫描或修改。

@@ -14,7 +14,7 @@
 
 在目标项目的 Agent 会话中发送本仓库链接即可。除非你说明其他目的，Agent 应默认把工作流安装到当前项目并校验：
 
-> Agent：若用户只发送此仓库链接，默认按 [`agent-bootstrap-instruction.md`](agent-bootstrap-instruction.md) 安装到当前工作区；若用户明确提出其他问题，则先处理该问题，不擅自安装。
+> Agent：若用户只发送此仓库链接，默认按 [`AGENT__bootstrap-instruction.md`](AGENT__bootstrap-instruction.md) 安装到当前工作区；若用户明确提出其他问题，则先处理该问题，不擅自安装。
 
 ```text
 https://github.com/RobiNexy/agent-coldstart-scaffold
@@ -68,20 +68,20 @@ pwsh -File .\install.ps1 -TargetDir 'C:\path\to\project'
 pwsh -File .\install.ps1 -Verify -TargetDir 'C:\path\to\project'
 ```
 
-安装器只补齐缺失文件，不运行 `git init`。已存在的文件一律跳过，包括 `.gitignore`；请人工合并所需条目。`--verify` 只检查文件存在性，不校验内容，用户对资产的修改会保留。
+安装器只补齐缺失文件，不运行 `git init`。已存在的文件一律跳过，包括 `.gitignore`；请人工合并所需条目。`--verify` 只检查文件存在性，不校验内容，用户对资产的修改会保留。若检测到路径冲突（例如目标目录中存在同名目录或父路径是符号链接），安装器返回非零；无冲突的文件可能已经写入，处理冲突后重跑即可继续补齐。
 
-从旧版升级时，安装器不会覆盖或删除已有文件。旧版生成的设计模板、代码占位目录若仍存在，请先确认其中没有项目自有内容，再自行清理；新版模板位于发行包的 `templates/` 目录。
+从旧版升级时，安装器不会覆盖或删除已有文件。旧版生成的设计模板、代码占位目录若仍存在，请先确认其中没有项目自有内容，再自行清理；新版模板位于发行包的 `templates/` 目录。从 v4.1.0 升级时，旧文件 `00__AGENT_START_HERE.md`、`core_mindset.md`、`workflow_rules_for_ai.md` 会保留；确认新入口和规则可用后，请手动删除旧文件，避免两份规则并存。
 
 ## 默认安装的文件
 
 ```text
-00__AGENT_START_HERE.md                 Agent 的唯一入口
+00__AGENT__START_HERE.md                Agent 的唯一入口
 10__ALWAYS_LOAD_FIRST/                  工作规则和项目资料；按需读取
 20__EDIT_BEFORE_SESSION_END/            仅在有跨会话信息时维护的记忆
 .gitignore                              通用忽略项示例
 ```
 
-数字前缀只用于分组，不表示任务步骤。`10__ALWAYS_LOAD_FIRST/` 是项目规则的首选位置，不要求全量读取；`20__EDIT_BEFORE_SESSION_END/` 仅在跨会话信息变化时更新。脚手架不创建业务代码、测试、人类资料或设计文档目录；沿用项目已有布局。人类撰写的原始资料可选放在项目根目录 `human-source/`，该目录不会自动创建；若存在，Agent 默认不读取、不编辑、不移动其中内容，只有用户明确要求时才读取。
+数字前缀只用于分组，不表示任务步骤。控制 Agent 行为的文档统一使用 `AGENT__` 类型前缀；项目资料、领域资料和会话记忆不使用该前缀。`10__ALWAYS_LOAD_FIRST/` 是项目规则的首选位置，不要求全量读取；`20__EDIT_BEFORE_SESSION_END/` 仅在跨会话信息变化时更新。脚手架不创建业务代码、测试、人类资料或设计文档目录；沿用项目已有布局。人类撰写的原始资料可选放在项目根目录 `human-source/`，该目录不会自动创建；若存在，Agent 默认不读取、不编辑、不移动其中内容，只有用户明确要求时才读取。
 
 ## 按需使用模板
 
@@ -104,7 +104,7 @@ Copy-Item (Join-Path $sourceDir 'templates/feature/_TEMPLATE__FEATURE.md') `
   'C:\path\to\your-project\design\FEATURE__place-order.md'
 ```
 
-核心原则和执行规则分别见 `scaffold/10__ALWAYS_LOAD_FIRST/core_mindset.md` 与 `scaffold/10__ALWAYS_LOAD_FIRST/workflow_rules_for_ai.md`。
+核心原则和执行规则分别见 `scaffold/10__ALWAYS_LOAD_FIRST/AGENT__core_mindset.md` 与 `scaffold/10__ALWAYS_LOAD_FIRST/AGENT__workflow_rules_for_ai.md`。
 
 ## 环境要求
 
@@ -122,7 +122,7 @@ Copy-Item (Join-Path $sourceDir 'templates/feature/_TEMPLATE__FEATURE.md') `
 
 ## 设计文档
 
-`docs/` 中保存 v2、v3 的设计存档，仅供参考。当前工作流以 `scaffold/10__ALWAYS_LOAD_FIRST/core_mindset.md`、`scaffold/10__ALWAYS_LOAD_FIRST/workflow_rules_for_ai.md` 与本 README 为准。
+`docs/` 中保存 v2、v3 的设计存档，仅供参考。当前工作流以 `scaffold/10__ALWAYS_LOAD_FIRST/AGENT__core_mindset.md`、`scaffold/10__ALWAYS_LOAD_FIRST/AGENT__workflow_rules_for_ai.md` 与本 README 为准。
 
 ## License
 

@@ -1,0 +1,120 @@
+name: CI
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  bash-installers:
+    name: Bash installer (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Smoke test install, verify, idempotency and errors
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          work="$(mktemp -d "${TMPDIR:-/tmp}/acs-ci.XXXXXX")"
+          trap 'rm -rf "$work"' EXIT
+
+          target="$work/project"
+          mkdir -p "$target"
+
+          bash install.sh "$target"
+          bash install.sh --verify "$target"
+          bash install.sh "$target"
+          bash install.sh --verify "$target"
+
+          expect_exit() {
+            local expected="$1"
+            shift
+            local code=0
+            set +e
+            "$@" >"$work/output" 2>&1
+            code=$?
+            set -e
+            if [ "$code" -ne "$expected" ]; then
+              echo "expected exit $expected, got $code: $*" >&2
+              cat "$work/output" >&2
+              exit 1
+            fi
+          }
+
+          expect_exit 2 bash install.sh --bogus
+
+          missing="$work/does-not-exist"
+          expect_exit 2 bash install.sh "$missing"
+          grep -F "$missing" "$work/output"
+
+          target2="$work/project-with-symlink"
+          outside="$work/outside"
+          mkdir -p "$target2" "$outside"
+          ln -s "$outside" "$target2/10__ALWAYS_LOAD_FIRST"
+          expect_exit 2 bash install.sh "$target2"
+          if [ "$(find "$outside" -type f | wc -l | tr -d ' ')" -ne 0 ]; then
+            echo 'installer wrote through a symlinked parent' >&2
+            exit 1
+          fi
+
+  powershell-installer:
+    name: PowerShell installer (windows-latest)
+    runs-on: windows-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Smoke test install, verify, idempotency and errors
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+
+          function Assert-ExitCode {
+            param([int] $Expected, [string] $Action)
+            if ($LASTEXITCODE -ne $Expected) {
+              throw "expected exit $Expected for $Action, got $LASTEXITCODE"
+            }
+          }
+
+          $work = Join-Path $env:RUNNER_TEMP ("acs-ci-" + [guid]::NewGuid().ToString('N'))
+          try {
+            $target = Join-Path $work 'project'
+            New-Item -ItemType Directory -Path $target -Force | Out-Null
+
+            & pwsh -NoProfile -File ./install.ps1 -TargetDir $target
+            Assert-ExitCode 0 'initial install'
+            & pwsh -NoProfile -File ./install.ps1 -Verify -TargetDir $target
+            Assert-ExitCode 0 'initial verify'
+            & pwsh -NoProfile -File ./install.ps1 -TargetDir $target
+            Assert-ExitCode 0 'idempotent install'
+            & pwsh -NoProfile -File ./install.ps1 -Verify -TargetDir $target
+            Assert-ExitCode 0 'verify after reinstall'
+
+            $missing = Join-Path $work 'does-not-exist'
+            & pwsh -NoProfile -File ./install.ps1 -TargetDir $missing
+            Assert-ExitCode 2 'missing target'
+
+            $target2 = Join-Path $work 'project-with-conflict'
+            New-Item -ItemType Directory -Path $target2 -Force | Out-Null
+            New-Item -ItemType Directory -Path (Join-Path $target2 '00__AGENT__START_HERE.md') -Force | Out-Null
+            & pwsh -NoProfile -File ./install.ps1 -TargetDir $target2
+            Assert-ExitCode 2 'path conflict'
+            if (Test-Path -LiteralPath (Join-Path $target2 '00__AGENT__START_HERE.md') -PathType Leaf) {
+              throw 'installer replaced a directory with a file'
+            }
+          }
+          finally {
+            if (Test-Path -LiteralPath $work) {
+              Remove-Item -LiteralPath $work -Recurse -Force
+            }
+          }
