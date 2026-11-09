@@ -118,3 +118,7 @@ jobs:
               Remove-Item -LiteralPath $work -Recurse -Force
             }
           }
+
+          # The expected installer failures above leave $LASTEXITCODE non-zero.
+          # GitHub's pwsh wrapper exits with it unless the step ends successfully.
+          exit 0
