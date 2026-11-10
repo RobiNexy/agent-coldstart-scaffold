@@ -2,18 +2,18 @@
 # =============================================================
 # agent-coldstart-scaffold / install.sh
 #
-# 用途: 将 AI Native 工作流脚手架安装到已存在的目标项目目录
-# 特性: 幂等安装（永不覆盖）、只读校验（存在性）
-# 环境要求: bash 3.2+ 与常见 Unix 工具
-# 退出码: 0 成功 / 1 校验有缺失 / 2 参数或环境错误
+# Purpose: install the AI-native workflow scaffold into an existing project.
+# Features: idempotent (never overwrites), read-only verification (presence only).
+# Requires: bash 3.2+ and common Unix tools.
+# Exit codes: 0 success / 1 verification found missing files / 2 usage or environment error
 # =============================================================
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-die() { echo "错误: $*" >&2; exit 2; }
+die() { echo "Error: $*" >&2; exit 2; }
 
-# 若 rel_path 的任一父路径是符号链接，返回 0。
+# Returns 0 if any parent component of rel_path is a symbolic link.
 has_symlink_parent() {
   local rel_path="$1"
   local parent_rel current component
@@ -38,18 +38,18 @@ has_symlink_parent() {
 
 usage() {
   cat <<'USAGE'
-用法: bash install.sh [选项] [目标目录]
+Usage: bash install.sh [options] [target-dir]
 
-目标目录须已存在，默认为当前目录。
+The target directory must already exist; it defaults to the current directory.
 
-选项:
-  --verify            仅校验资产文件是否就位，不写任何文件
-  --scaffold-dir DIR  指定资产目录（默认: 脚本所在目录下的 scaffold/）
-  -h, --help          显示本帮助
+Options:
+  --verify            Only check that asset files are present; write nothing.
+  --scaffold-dir DIR  Asset directory (default: scaffold/ beside this script).
+  -h, --help          Show this help.
 
-示例:
-  bash install.sh /path/to/project               # 安装到目标项目
-  bash install.sh --verify /path/to/project      # 校验目标项目
+Examples:
+  bash install.sh /path/to/project
+  bash install.sh --verify /path/to/project
 USAGE
 }
 
@@ -61,30 +61,30 @@ while [ "$#" -gt 0 ]; do
   case "$1" in
     --verify) MODE="verify"; shift ;;
     --scaffold-dir)
-      [ "$#" -ge 2 ] || die "--scaffold-dir 需要一个路径参数"
+      [ "$#" -ge 2 ] || die "--scaffold-dir requires a path argument"
       SCAFFOLD_DIR="$2"
       shift 2
       ;;
     -h|--help) usage; exit 0 ;;
-    --*) die "未知选项: $1（见 --help）" ;;
+    --*) die "Unknown option: $1 (see --help)" ;;
     *) POSITIONAL+=("$1"); shift ;;
   esac
 done
 
-[ "${#POSITIONAL[@]}" -le 1 ] || die "最多接受一个目标目录参数"
+[ "${#POSITIONAL[@]}" -le 1 ] || die "At most one target directory argument is accepted"
 TARGET="."
 if [ "${#POSITIONAL[@]}" -eq 1 ]; then
   TARGET="${POSITIONAL[0]}"
 fi
 
-[ -d "$SCAFFOLD_DIR" ] || die "未找到资产目录: ${SCAFFOLD_DIR}
-  请在解压后的 agent-coldstart-scaffold/ 内运行本脚本，
-  或用 --scaffold-dir 显式指定。"
+[ -d "$SCAFFOLD_DIR" ] || die "Asset directory not found: ${SCAFFOLD_DIR}
+  Run this script from inside the unpacked agent-coldstart-scaffold/ directory,
+  or pass --scaffold-dir explicitly."
 
 SCAFFOLD_DIR="$(cd "$SCAFFOLD_DIR" && pwd)"
 target_arg="$TARGET"
 TARGET="$(cd "$TARGET" 2>/dev/null && pwd)" \
-  || die "目标目录不存在: ${target_arg}（请先创建，本脚本不代建项目根目录）"
+  || die "Target directory does not exist: ${target_arg} (create it first; this script does not create project roots)"
 
 created=0
 skipped=0
@@ -93,7 +93,7 @@ missing=0
 conflicts=0
 total=0
 
-# find 在进程替换中执行；NUL 分隔可安全处理包含空格的路径。
+# find runs in a process substitution; NUL separation handles paths with spaces.
 while IFS= read -r -d '' rel; do
   rel="${rel#./}"
   dst="${TARGET}/${rel}"
@@ -101,25 +101,29 @@ while IFS= read -r -d '' rel; do
 
   if [ "$MODE" = "install" ]; then
     if has_symlink_parent "$rel"; then
-      echo "  CONFLICT ${rel}（父路径是符号链接，拒绝写出目标目录）" >&2
+      echo "  CONFLICT ${rel} (parent path is a symbolic link; refusing to write outside the target)" >&2
       conflicts=$((conflicts + 1))
     elif [ -f "$dst" ]; then
       echo "  SKIP    ${rel}"
       skipped=$((skipped + 1))
       if [ "$rel" = ".gitignore" ]; then
-        echo "          └ 目标已有 .gitignore，请人工确认包含依赖/构建产物条目"
+        echo "          └ Target already has .gitignore; confirm it covers dependencies and build output"
+      fi
+      if [ "$rel" = "AGENTS.md" ]; then
+        echo "          └ AGENTS.md already exists. Add this line to it so agent hosts load the workflow:"
+        echo "            Before doing anything in this repository, read \`00__AGENT__START_HERE.md\` and follow it."
       fi
     elif [ -e "$dst" ] || [ -L "$dst" ]; then
-      echo "  CONFLICT ${rel}（目标路径存在但不是普通文件，未覆盖）" >&2
+      echo "  CONFLICT ${rel} (target path exists but is not a regular file; not overwritten)" >&2
       conflicts=$((conflicts + 1))
     else
-      mkdir -p "$(dirname "$dst")" || die "无法创建目标目录: $(dirname "$dst")"
-      cp "${SCAFFOLD_DIR}/${rel}" "$dst" || die "无法复制资产: ${rel}"
+      mkdir -p "$(dirname "$dst")" || die "Cannot create target directory: $(dirname "$dst")"
+      cp "${SCAFFOLD_DIR}/${rel}" "$dst" || die "Cannot copy asset: ${rel}"
       echo "  OK      ${rel}"
       created=$((created + 1))
     fi
   elif has_symlink_parent "$rel"; then
-    echo "  MISSING ${rel}（父路径是符号链接）"
+    echo "  MISSING ${rel} (parent path is a symbolic link)"
     missing=$((missing + 1))
   elif [ -f "$dst" ]; then
     present=$((present + 1))
@@ -129,29 +133,66 @@ while IFS= read -r -d '' rel; do
   fi
 done < <(cd "$SCAFFOLD_DIR" && find . -type f -print0)
 
+legacy_count=0
+check_legacy() {
+  local list="${SCRIPT_DIR}/legacy-paths.txt"
+  local rel
+
+  if [ -f "$list" ]; then
+    while IFS= read -r rel || [ -n "$rel" ]; do
+      [ -n "$rel" ] || continue
+      rel="${rel%\r}"
+      if [ -e "${TARGET}/${rel}" ] || [ -L "${TARGET}/${rel}" ]; then
+        echo "  LEGACY  ${rel} (from an older scaffold version; review and remove manually)" >&2
+        legacy_count=$((legacy_count + 1))
+      fi
+    done < "$list"
+  fi
+
+  if [ -f "${TARGET}/00__AGENT__START_HERE.md" ] \
+    && ! grep -qF 'agent-coldstart-scaffold entry v6' "${TARGET}/00__AGENT__START_HERE.md"; then
+    echo "  LEGACY  00__AGENT__START_HERE.md (older entry file; it does not reference the v6 layout. Replace it manually with scaffold/00__AGENT__START_HERE.md)" >&2
+    legacy_count=$((legacy_count + 1))
+  fi
+}
+
+check_legacy
+
 if [ "$MODE" = "install" ]; then
   if [ "$conflicts" -gt 0 ]; then
-    die "发现 ${conflicts} 个目标路径冲突；请先处理冲突后重跑安装器"
+    if [ "$legacy_count" -gt 0 ]; then
+      echo "Legacy paths found: ${legacy_count}. See README \"Upgrading\"." >&2
+    fi
+    die "Found ${conflicts} target path conflict(s); resolve them and rerun the installer"
   fi
 
   echo ""
   echo "============================================================"
-  echo " 安装完成: 新建 ${created} 个文件, 跳过 ${skipped} 个已存在文件"
+  echo " Install complete: ${created} file(s) created, ${skipped} existing file(s) skipped"
   echo ""
-  echo " 安装不会初始化 Git；需要模板时可从源码目录的 templates/ 按需复制。"
+  echo " No Git repository was initialized. Copy templates/ from the source directory when needed."
   echo "============================================================"
+  if [ "$legacy_count" -gt 0 ]; then
+    echo "Legacy paths found: ${legacy_count}. See README \"Upgrading\"."
+  fi
   exit 0
 fi
 
 echo ""
 echo "============================================================"
 if [ "$missing" -eq 0 ]; then
-  echo " 校验通过: ${present}/${total} 文件就位"
+  echo " Verification passed: ${present}/${total} file(s) present"
   echo "============================================================"
+  if [ "$legacy_count" -gt 0 ]; then
+    echo "Legacy paths found: ${legacy_count}. See README \"Upgrading\"."
+  fi
   exit 0
 fi
 
-echo " 校验失败: ${present} 就位, ${missing} 缺失"
-echo " 修复方法: 在脚手架目录重跑 bash install.sh '${TARGET}'"
+echo " Verification failed: ${present} present, ${missing} missing"
+echo " Fix: rerun bash install.sh '${TARGET}' from the scaffold directory"
 echo "============================================================"
+if [ "$legacy_count" -gt 0 ]; then
+  echo "Legacy paths found: ${legacy_count}. See README \"Upgrading\"."
+fi
 exit 1
