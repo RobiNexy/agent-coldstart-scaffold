@@ -2,6 +2,35 @@
 
 重要变更记录。每次发布前更新对应版本条目。
 
+## 6.0.0 — 2026-11-10
+
+与 5.x 的资产结构不兼容。安装器只补齐新文件并对旧版路径输出 LEGACY 警告；升级步骤见 README“升级”。
+
+### Changed
+
+- 哲学修正：规则只约束判断题，可机械检查的性质交给 `lint`；人类被建模为能力不同的队友而非仅审批者。
+- 目录重构为 `10__ALWAYS_LOAD/`（每次全读，保持小）、`20__PROJECT_CONTEXT/`、`30__PROCEDURES/`（按需程序）、`40__MEMORY/`。
+- 控制 Agent 行为的全部文件（`scaffold/`、`templates/`、启动指引、安装器输出）改为英文；README、CHANGELOG、docs 保持中文。
+- 规则文件拆分：原则（为什么）、规则（怎么做）、协作、沟通；ADR 程序独立成文并定义“接受”的最低形式、Rejected 改名规则。
+- 项目编码约定从可选模板升格为默认资产 `project_conventions.md`，新增环境识别、Git 工作方式、默认协作模式。
+- 自解释文件名升格为核心原则（Listing-first），明确允许的类型前缀集合与“名字不得误导只看列表的人”。
+
+### Added
+
+- `AGENT__collaboration.md`：能力地图、挣扎预算（同一阻塞两次后求助）、Copilot/Autopilot/Advisor 模式。
+- `AGENT__communication.md`：回复语言、带默认值的提问、结束报告格式。
+- 会话日志 `40__MEMORY/journal/`：每任务一文件，任务开始写头、结束补全；compaction 程序蒸馏为永久记忆并产出统计。
+- 程序文件：首个会话、生产就绪检查。
+- `AGENTS.md` 宿主钩子，随安装器写入；已存在时提示追加一行。
+- `lint.sh` / `lint.ps1` 知识库检查：悬空链接、标题与文件名、ADR 状态、看板引用、未完成日志等。
+- 安装器识别旧版残留路径与旧入口文件并输出 LEGACY 警告。
+- CI 新增 lint 夹具测试、安装器新行为测试与常驻规则词数预算。
+
+### Removed
+
+- `templates/project/`（已升格为默认资产）。
+- `10__ALWAYS_LOAD_FIRST/`、`20__EDIT_BEFORE_SESSION_END/` 目录名及 `AGENT__core_mindset.md`、`AGENT__workflow_rules_for_ai.md` 文件名。
+
 ## 5.0.0 — 2026-11-09
 
 与 4.x 的资产结构不兼容。安装器只补齐新文件，不会删除旧文件；升级后请按下方说明手动清理。

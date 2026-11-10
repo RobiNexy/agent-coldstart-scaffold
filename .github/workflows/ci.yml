@@ -60,10 +60,43 @@ jobs:
           target2="$work/project-with-symlink"
           outside="$work/outside"
           mkdir -p "$target2" "$outside"
-          ln -s "$outside" "$target2/10__ALWAYS_LOAD_FIRST"
+          ln -s "$outside" "$target2/10__ALWAYS_LOAD"
           expect_exit 2 bash install.sh "$target2"
           if [ "$(find "$outside" -type f | wc -l | tr -d ' ')" -ne 0 ]; then
             echo 'installer wrote through a symlinked parent' >&2
+            exit 1
+          fi
+
+          agents="$work/project-with-agents"
+          mkdir -p "$agents"
+          printf 'my own agents file\n' > "$agents/AGENTS.md"
+          expect_exit 0 bash install.sh "$agents"
+          grep -F 'AGENTS.md already exists' "$work/output"
+          grep -Fx 'my own agents file' "$agents/AGENTS.md"
+
+          legacy="$work/project-with-legacy"
+          mkdir -p "$legacy/10__ALWAYS_LOAD_FIRST"
+          printf '# old entry\n' > "$legacy/00__AGENT__START_HERE.md"
+          expect_exit 0 bash install.sh "$legacy"
+          grep -F 'LEGACY' "$work/output"
+          grep -F 'Legacy paths found: 2' "$work/output"
+          expect_exit 0 bash install.sh --verify "$legacy"
+          grep -F 'Legacy paths found: 2' "$work/output"
+
+          expect_exit 0 bash lint.sh tests/fixtures/kb-good
+          grep -F '0 errors' "$work/output"
+
+          expect_exit 1 bash lint.sh tests/fixtures/kb-bad
+          while IFS= read -r code; do
+            grep -F "$code" "$work/output"
+          done < tests/fixtures/kb-bad/expected-codes.txt
+
+          expect_exit 0 bash lint.sh "$target"
+          grep -F '0 errors' "$work/output"
+
+          words="$(cat scaffold/10__ALWAYS_LOAD/*.md scaffold/00__AGENT__START_HERE.md | wc -w | tr -d ' ')"
+          if [ "$words" -gt 3000 ]; then
+            echo "always-loaded budget exceeded: $words words (limit 3000)" >&2
             exit 1
           fi
 
@@ -112,6 +145,35 @@ jobs:
             if (Test-Path -LiteralPath (Join-Path $target2 '00__AGENT__START_HERE.md') -PathType Leaf) {
               throw 'installer replaced a directory with a file'
             }
+
+            $agents = Join-Path $work 'project-with-agents'
+            New-Item -ItemType Directory -Path $agents -Force | Out-Null
+            Set-Content -LiteralPath (Join-Path $agents 'AGENTS.md') -Value 'my own agents file'
+            $agentsOut = (& pwsh -NoProfile -File ./install.ps1 -TargetDir $agents 2>&1 | Out-String)
+            Assert-ExitCode 0 'existing AGENTS.md'
+            if ($agentsOut -notmatch 'AGENTS\.md already exists') { throw 'expected an AGENTS.md hint' }
+            if ((Get-Content -LiteralPath (Join-Path $agents 'AGENTS.md') -Raw).Trim() -ne 'my own agents file') { throw 'AGENTS.md was overwritten' }
+
+            $legacy = Join-Path $work 'project-with-legacy'
+            New-Item -ItemType Directory -Path (Join-Path $legacy '10__ALWAYS_LOAD_FIRST') -Force | Out-Null
+            Set-Content -LiteralPath (Join-Path $legacy '00__AGENT__START_HERE.md') -Value '# old entry'
+            $legacyOut = (& pwsh -NoProfile -File ./install.ps1 -TargetDir $legacy 2>&1 | Out-String)
+            Assert-ExitCode 0 'legacy install'
+            $legacyLines = @($legacyOut -split "`n" | Where-Object { $_ -match 'LEGACY' })
+            if ($legacyLines.Count -lt 2) { throw 'expected two LEGACY lines' }
+            if ($legacyOut -notmatch 'Legacy paths found: 2') { throw 'expected legacy summary' }
+
+            & pwsh -NoProfile -File ./lint.ps1 -TargetDir ./tests/fixtures/kb-good
+            Assert-ExitCode 0 'lint good fixture'
+
+            $badOut = (& pwsh -NoProfile -File ./lint.ps1 -TargetDir ./tests/fixtures/kb-bad 2>&1 | Out-String)
+            Assert-ExitCode 1 'lint bad fixture'
+            foreach ($code in Get-Content -LiteralPath ./tests/fixtures/kb-bad/expected-codes.txt) {
+              if ($badOut -notmatch [regex]::Escape($code)) { throw "lint did not report $code" }
+            }
+
+            & pwsh -NoProfile -File ./lint.ps1 -TargetDir $target
+            Assert-ExitCode 0 'lint installed project'
           }
           finally {
             if (Test-Path -LiteralPath $work) {
