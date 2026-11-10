@@ -1,20 +1,20 @@
-# FEATURE__主题
+# FEATURE__topic
 
-将文件名和标题改成实际主题。记录需要跨会话保留的行为和验收条件；删除不适用的小节及未使用的占位链接。
+Rename file and title. Record behavior and acceptance conditions that must survive across sessions. Delete sections and placeholder links that do not apply.
 
-## 目标与行为
+## Goal and behavior
 
-谁需要什么结果？写下关键成功条件和重要失败边界。
+Who needs what outcome? Key success conditions and important failure boundaries.
 
-- 给定 …，当 …，则 …
+- Given …, when …, then …
 
-## 不包含或不变量（可选）
+## Exclusions or invariants (optional)
 
 - …
 
-## 相关设计（可选）
+## Related design (optional)
 
-- [[ADR__结论]]
-- [[API__主题]] 或 [[DATA__主题]]
+- [[ADR__conclusion]]
+- [[API__topic]] or [[DATA__topic]]
 
-测试与实现路径由项目自身目录结构决定。需要反向追溯时，可在测试中使用 `@spec [[FEATURE__主题]]`。
+Tests and implementation live wherever the project keeps them. For traceability, a test may reference `@spec [[FEATURE__topic]]`.

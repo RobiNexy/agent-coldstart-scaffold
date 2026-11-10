@@ -1,30 +1,26 @@
-# ADR__结论
+# ADR__conclusion
 
-将文件名和标题改成简洁结论；结论改变时新建 ADR，不改写已接受的记录。
+Rename file and title to a concise conclusion (what the project does). A changed conclusion is a new ADR; accepted records are not rewritten. Procedure: [[AGENT__procedure__adr]].
 
-## 元数据
+## Metadata
 
-- 状态：Proposed
-- 提出日期：YYYY-MM-DD
-- 接受日期：待接受时留空；获人类明确接受后填写
-- 取代：无 / [[ADR__旧结论]]（仅在本决策替代旧决策时填写）
+- Status: Proposed
+- Proposed: YYYY-MM-DD
+- Accepted: (leave empty until a human explicitly accepts this conclusion)
+- Supersedes: none
 
-新记录从 `Proposed` 开始。只有人类明确接受或拒绝此具体结论后，才将状态改为 `Accepted` 或 `Rejected`。请求改变旧决策不等于接受替代方案。新决策获接受并替代旧决策时，在此处链接旧记录；旧记录状态更新为 `Superseded by [[ADR__新结论]]` 以便反向导航，此链接只是导航，取代关系以本字段为准。
+## Context and decision
 
-获接受后冻结背景、决策、理由、后果和重新评估条件；状态、日期及取代导航等元数据允许按工作流规则更新。
+The problem and constraints; we choose ….
 
-## 背景与决策
+## Rationale
 
-需要解决的问题与约束；我们选择 …。
+- Key trade-offs and the main alternatives considered: …
 
-## 理由
+## Consequences
 
-- 关键取舍及主要备选方案：…
+- Benefits and costs: …
 
-## 后果
-
-- 收益与代价：…
-
-## 重新评估条件（可选）
+## Revisit when (optional)
 
 - …

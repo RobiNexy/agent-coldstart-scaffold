@@ -1,12 +1,12 @@
-# SEQUENCE__场景
+# SEQUENCE__scenario
 
-可选模板。只画理解行为所需的参与方与交互。
+Optional. Draw only the participants and interactions needed to understand the behavior.
 
 ```mermaid
 sequenceDiagram
-    participant A as "参与方 A"
-    participant B as "参与方 B"
+    participant A as "Participant A"
+    participant B as "Participant B"
 
-    A->>B: "请求"
-    B-->>A: "响应"
+    A->>B: "request"
+    B-->>A: "response"
 ```
