@@ -1,0 +1,11 @@
+# Environment secrets
+.env
+.env.*
+!.env.example
+
+# Common local artifacts
+*.log
+.DS_Store
+Thumbs.db
+
+# Add dependency/build output patterns after the project's technology stack is chosen.

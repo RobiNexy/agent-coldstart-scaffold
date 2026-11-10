@@ -1,10 +1,10 @@
-# MODULE__主题
+# MODULE__topic
 
-可选模板。只画出读者需要理解的模块边界与依赖，不预设目录结构。
+Optional. Draw only the module boundaries and dependencies a reader needs; do not prescribe directory layout.
 
 ```mermaid
 flowchart LR
-    A["模块 A"] --> B["模块 B"]
+    A["Module A"] --> B["Module B"]
 ```
 
-关键依赖约束（需要时）：…
+Key dependency constraints (if needed): …

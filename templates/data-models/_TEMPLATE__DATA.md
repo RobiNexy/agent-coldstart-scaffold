@@ -1,16 +1,16 @@
-# DATA__名称
+# DATA__name
 
-将文件名和标题改成实际名称。此页记录数据语义；数据库或序列化格式的精确结构以唯一权威定义为准，避免维护两份字段清单。
+Rename file and title. This records data *meaning*; the exact schema lives in one authoritative definition. Do not maintain two field lists.
 
-## 用途与关键约束
+## Purpose and key constraints
 
-- 服务于什么行为：…
-- 重要不变量或唯一性约束：…
+- Serves which behavior: …
+- Important invariants or uniqueness constraints: …
 
-## 生命周期（适用时）
+## Lifecycle (if applicable)
 
-创建、更新、删除或保留规则：…
+Creation, update, deletion or retention rules: …
 
-## 权威定义（按需）
+## Authoritative definition (if any)
 
-只填写一个权威 Schema、迁移或序列化定义的路径。其他结构文件必须由它生成或保持同步；没有独立定义时删除本节。
+Path to the single authoritative schema, migration or serialization definition. Other structural files are generated from it or kept in sync. Delete this section if none exists.

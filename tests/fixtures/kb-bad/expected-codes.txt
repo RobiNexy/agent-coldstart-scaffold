@@ -1,0 +1,9 @@
+L1-dangling-link
+L2-ambiguous-link
+L3-title-mismatch
+L4-adr-status
+L5-rejected-name
+L6-orphan-question
+L7-incomplete-journal
+L8-unknown-type
+L9-journal-count

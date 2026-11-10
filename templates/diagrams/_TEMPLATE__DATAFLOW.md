@@ -1,16 +1,16 @@
-# DATAFLOW__主题
+# DATAFLOW__topic
 
-可选模板。只画出影响理解的来源、处理和存储。
+Optional. Draw only the sources, processing and stores that affect understanding.
 
 ```mermaid
 flowchart LR
-    subgraph SRC["来源"]
-        A["来源组件"]
+    subgraph SRC["Sources"]
+        A["Source component"]
     end
-    subgraph PROC["处理"]
-        B["处理组件"]
-        C[("存储")]
+    subgraph PROC["Processing"]
+        B["Processing component"]
+        C[("Store")]
     end
-    A -->|"数据 X"| B
-    B -->|"数据 Y"| C
+    A -->|"data X"| B
+    B -->|"data Y"| C
 ```

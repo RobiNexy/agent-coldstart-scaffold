@@ -1,13 +1,13 @@
-# API__名称
+# API__name
 
-将文件名和标题改成实际名称。只记录跨进程或对外可见的契约；若另有 [[FEATURE__主题]]，此处只记录接口层约束，不重复功能规格。没有功能规格时删除该链接。
+Rename file and title. Record only cross-process or externally visible contracts. If a [[FEATURE__topic]] exists, keep only interface-level constraints here; delete the link otherwise.
 
-## 接口与行为
+## Interface and behavior
 
-- 方法、路径或事件：…
-- 请求与响应：只列重要字段和约束，或链接到唯一权威的 OpenAPI、JSON Schema 等定义
-- 错误与幂等：…（适用时）
+- Method, path or event: …
+- Request and response: important fields and constraints only, or a link to the single authoritative OpenAPI / JSON Schema
+- Errors and idempotency: … (if applicable)
 
-## 兼容性
+## Compatibility
 
-记录重要兼容边界。破坏性变更须获得人类授权；重要的长期取舍可另记 ADR。
+Important compatibility boundaries. Breaking changes require human authorization; lasting trade-offs may deserve an ADR.
