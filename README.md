@@ -115,6 +115,7 @@ AGENTS.md                                   宿主钩子，只有一句指向入
   AGENT__procedure__production_readiness.md
 40__MEMORY/                                 写入层
   journal/                                  每任务一条会话日志
+  tasks/                                    并行任务领取（TASK__）
   project_state_now.md
   task_board.md
   open_questions_for_human.md
@@ -158,6 +159,18 @@ Agent 与人的互动密度由模式控制，默认值写在目标项目的 `20_
 
 研究不是每个任务的必经阶段，只在决策依赖外部证据时触发。学术调研与技术调研共用同一结构，区别在证据标准：前者看同行评审、方法与复现，后者优先官方文档、源码、可复现的 benchmark 或 spike。程序见 `30__PROCEDURES/AGENT__procedure__research.md` 与 `AGENT__procedure__long-form-writing.md`。
 
+## 并行会话
+
+并行只按写入集合拆分：两个 session 会写同一个文件时，串行。约定如下：
+
+- 一个 session 一个 worktree、一个分支；worktree 放在项目根目录之外，否则 `lint` 会把副本当成同名知识库。
+- 开始编辑前写 `40__MEMORY/tasks/TASK__<id>.md`，记录 `Owner`、`Status`、`Branch`、`Scope`、`Started`。
+- 共享文件——入口、规则、项目约定、`project_state_now.md`、`task_board.md`、`open_questions_for_human.md`、已接受的 ADR——只由集成 session 写。
+- 并行模式下日志文件名追加 `--<owner>`，避免同分钟碰撞。
+- 集成 session 一次合并一个分支，每合一个重跑 `lint` 与相关测试；不要最后一次性合并。
+
+完整规则见 `30__PROCEDURES/AGENT__procedure__parallel-work.md`。
+
 ## 宿主集成
 
 安装器会写入一个极薄的 `AGENTS.md`，内容是“先读 `00__AGENT__START_HERE.md` 并照做”。多数支持 `AGENTS.md` 的宿主会自动加载它。
@@ -192,7 +205,7 @@ Agent 与人的互动密度由模式控制，默认值写在目标项目的 `20_
 
 ## 按需使用模板
 
-模板位于仓库的 `templates/`，不属于默认安装资产：`decisions/`、`feature/`、`contracts/`、`data-models/`、`operations/`、`research/` 与四类 `diagrams/`。只在确有需要时复制到合适位置，删除不适用的小节，并改成与内容匹配的文件名和标题。例如，`source_dir` 使用前文创建的源码目录：
+模板位于仓库的 `templates/`，不属于默认安装资产：`decisions/`、`feature/`、`contracts/`、`data-models/`、`operations/`、`research/`、`tasks/` 与四类 `diagrams/`。只在确有需要时复制到合适位置，删除不适用的小节，并改成与内容匹配的文件名和标题。例如，`source_dir` 使用前文创建的源码目录：
 
 ```bash
 mkdir -p /path/to/your-project/design

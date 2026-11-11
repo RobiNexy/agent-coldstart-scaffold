@@ -19,6 +19,7 @@ You are an agent helping maintain this project. This is the only entry point. Lo
 | How to do specific things | `30__PROCEDURES/` — see table below |
 | What happened recently | `40__MEMORY/journal/` (newest entries only) |
 | What is true now / unfinished work / decisions awaiting a human | `40__MEMORY/project_state_now.md`, `task_board.md`, `open_questions_for_human.md` |
+| Active work claims and ownership | `40__MEMORY/tasks/` |
 | Research questions, sources and long-form reports | `50__RESEARCH/` |
 | Design documents | The project's chosen directory; `design/` if none exists |
 | Who references a file | `rg -nF '[[ADR__example' .` |
@@ -39,6 +40,7 @@ You are an agent helping maintain this project. This is the only entry point. Lo
 | Extract a design language, or implement one in CSS or LaTeX | [[AGENT__procedure__design-language]] |
 | Research a question, compare options or gather evidence | [[AGENT__procedure__research]] |
 | Write a long-form report, proposal or article | [[AGENT__procedure__long-form-writing]] |
+| Run two or more sessions in parallel, or hand work between sessions | [[AGENT__procedure__parallel-work]] |
 | Read a paper and explain it from first principles | [[AGENT__procedure__paper-reading]] |
 | Finish a task | [[AGENT__procedure__task_end]] |
 | Tidy the knowledge base, or `journal/` has more than 20 entries | [[AGENT__procedure__compaction]] |
@@ -49,7 +51,7 @@ You are an agent helping maintain this project. This is the only entry point. Lo
 
 Knowledge files are named `TYPE__conclusion-or-topic.md`. The title (first `#` heading) equals the filename stem. Link with `[[filename]]`; targets must be unique in the repository.
 
-Allowed types: `AGENT` (controls agent behavior), `ADR`, `FEATURE`, `API`, `DATA`, `OPS`, `SEQUENCE`, `STATE`, `DATAFLOW`, `MODULE`, `SUMMARY` (journal compaction output), `SOURCE` (one evidence source), `RESEARCH` (one investigation), `REPORT` (reader-facing long-form deliverable). Adding a type is a decision: ask first.
+Allowed types: `AGENT` (controls agent behavior), `ADR`, `FEATURE`, `API`, `DATA`, `OPS`, `SEQUENCE`, `STATE`, `DATAFLOW`, `MODULE`, `SUMMARY` (journal compaction output), `SOURCE` (one evidence source), `RESEARCH` (one investigation), `REPORT` (reader-facing long-form deliverable), `TASK` (one active work claim). Adding a type is a decision: ask first.
 
 A name must never mislead someone who only sees the listing. Prefer conclusions over topics: `ADR__use-postgres-for-jsonb` beats `ADR__database-choice`. Negative conclusions are valuable: `ADR__do-not-use-orm`.
 
