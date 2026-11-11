@@ -173,11 +173,41 @@ EOF
   # L8: unknown type prefix.
   type="$(printf '%s' "$stem" | sed -nE 's/^([0-9]{2}__)?([A-Z][A-Z0-9]*)__.*/\2/p')"
   if [ -n "$type" ]; then
-    case " AGENT ADR FEATURE API DATA OPS SEQUENCE STATE DATAFLOW MODULE SUMMARY " in
+    case " AGENT ADR FEATURE API DATA OPS SEQUENCE STATE DATAFLOW MODULE SUMMARY SOURCE RESEARCH REPORT " in
       *" $type "*) ;;
       *) warn "L8-unknown-type" "$display" "unknown type prefix '$type' (see allowed types in 00__AGENT__START_HERE.md)" ;;
     esac
   fi
+
+  # L10: research records carry a question, a status and an as-of date.
+  case "$stem" in
+    RESEARCH__*)
+      question_count="$(grep -cE '^- Question: .+' "$file" || true)"
+      status_count="$(grep -cE '^- Status: (active|concluded|superseded)$' "$file" || true)"
+      asof_count="$(grep -cE '^- As of: [0-9]{4}-[0-9]{2}-[0-9]{2}$' "$file" || true)"
+      [ -n "$question_count" ] || question_count=0
+      [ -n "$status_count" ] || status_count=0
+      [ -n "$asof_count" ] || asof_count=0
+      if [ "$question_count" -ne 1 ] || [ "$status_count" -ne 1 ] || [ "$asof_count" -ne 1 ]; then
+        err "L10-research-metadata" "$display" "expected exactly one '- Question:', one '- Status: active|concluded|superseded' and one '- As of: YYYY-MM-DD'"
+      fi
+      ;;
+  esac
+
+  # L11: source records carry a type, a citation or URL, and an access date.
+  case "$stem" in
+    SOURCE__*)
+      type_count="$(grep -cE '^- Type: (paper|documentation|source-code|benchmark|article|book|talk|other)$' "$file" || true)"
+      citation_count="$(grep -cE '^- (Citation|URL): .+' "$file" || true)"
+      accessed_count="$(grep -cE '^- Accessed: [0-9]{4}-[0-9]{2}-[0-9]{2}$' "$file" || true)"
+      [ -n "$type_count" ] || type_count=0
+      [ -n "$citation_count" ] || citation_count=0
+      [ -n "$accessed_count" ] || accessed_count=0
+      if [ "$type_count" -ne 1 ] || [ "$citation_count" -lt 1 ] || [ "$accessed_count" -ne 1 ]; then
+        err "L11-source-metadata" "$display" "expected one valid '- Type:', at least one '- Citation:' or '- URL:', and one '- Accessed: YYYY-MM-DD'"
+      fi
+      ;;
+  esac
 done < "$tmp/files"
 
 # L6: task-board question references must exist in open questions.

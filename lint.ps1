@@ -56,7 +56,8 @@ $excluded = @(
 )
 $allowedTypes = @(
     'AGENT', 'ADR', 'FEATURE', 'API', 'DATA', 'OPS',
-    'SEQUENCE', 'STATE', 'DATAFLOW', 'MODULE', 'SUMMARY'
+    'SEQUENCE', 'STATE', 'DATAFLOW', 'MODULE', 'SUMMARY',
+    'SOURCE', 'RESEARCH', 'REPORT'
 )
 
 $script:errors = 0
@@ -191,6 +192,28 @@ foreach ($file in $files) {
         $type = $typeMatch.Groups[2].Value
         if ($allowedTypes -notcontains $type) {
             Write-Finding 'WARN' 'L8-unknown-type' $display "unknown type prefix '$type' (see allowed types in 00__AGENT__START_HERE.md)"
+        }
+    }
+
+    # L10: research records carry a question, a status and an as-of date.
+    if ($stem.StartsWith('RESEARCH__')) {
+        $lines = @(Get-Content -LiteralPath $file.FullName)
+        $questionCount = @($lines | Where-Object { $_ -match '^- Question: .+' }).Count
+        $statusCount = @($lines | Where-Object { $_ -match '^- Status: (active|concluded|superseded)$' }).Count
+        $asOfCount = @($lines | Where-Object { $_ -match '^- As of: [0-9]{4}-[0-9]{2}-[0-9]{2}$' }).Count
+        if ($questionCount -ne 1 -or $statusCount -ne 1 -or $asOfCount -ne 1) {
+            Write-Finding 'ERROR' 'L10-research-metadata' $display "expected exactly one '- Question:', one '- Status: active|concluded|superseded' and one '- As of: YYYY-MM-DD'"
+        }
+    }
+
+    # L11: source records carry a type, a citation or URL, and an access date.
+    if ($stem.StartsWith('SOURCE__')) {
+        $lines = @(Get-Content -LiteralPath $file.FullName)
+        $typeCount = @($lines | Where-Object { $_ -match '^- Type: (paper|documentation|source-code|benchmark|article|book|talk|other)$' }).Count
+        $citationCount = @($lines | Where-Object { $_ -match '^- (Citation|URL): .+' }).Count
+        $accessedCount = @($lines | Where-Object { $_ -match '^- Accessed: [0-9]{4}-[0-9]{2}-[0-9]{2}$' }).Count
+        if ($typeCount -ne 1 -or $citationCount -lt 1 -or $accessedCount -ne 1) {
+            Write-Finding 'ERROR' 'L11-source-metadata' $display "expected one valid '- Type:', at least one '- Citation:' or '- URL:', and one '- Accessed: YYYY-MM-DD'"
         }
     }
 }
