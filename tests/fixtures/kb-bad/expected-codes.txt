@@ -9,3 +9,5 @@ L8-unknown-type
 L9-journal-count
 L10-research-metadata
 L11-source-metadata
+L12-task-claim
+L13-task-board-reference

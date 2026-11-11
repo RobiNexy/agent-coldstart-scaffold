@@ -57,7 +57,7 @@ $excluded = @(
 $allowedTypes = @(
     'AGENT', 'ADR', 'FEATURE', 'API', 'DATA', 'OPS',
     'SEQUENCE', 'STATE', 'DATAFLOW', 'MODULE', 'SUMMARY',
-    'SOURCE', 'RESEARCH', 'REPORT'
+    'SOURCE', 'RESEARCH', 'REPORT', 'TASK'
 )
 
 $script:errors = 0
@@ -216,6 +216,19 @@ foreach ($file in $files) {
             Write-Finding 'ERROR' 'L11-source-metadata' $display "expected one valid '- Type:', at least one '- Citation:' or '- URL:', and one '- Accessed: YYYY-MM-DD'"
         }
     }
+
+    # L12: active task claims carry owner, branch, scope and start date.
+    if ($stem.StartsWith('TASK__')) {
+        $lines = @(Get-Content -LiteralPath $file.FullName)
+        $statusCount = @($lines | Where-Object { $_ -match '^- Status: (active|blocked|done)$' }).Count
+        $ownerCount = @($lines | Where-Object { $_ -match '^- Owner: .+' }).Count
+        $branchCount = @($lines | Where-Object { $_ -match '^- Branch: .+' }).Count
+        $scopeCount = @($lines | Where-Object { $_ -match '^- Scope: .+' }).Count
+        $startedCount = @($lines | Where-Object { $_ -match '^- Started: [0-9]{4}-[0-9]{2}-[0-9]{2}$' }).Count
+        if ($statusCount -ne 1 -or $ownerCount -ne 1 -or $branchCount -ne 1 -or $scopeCount -ne 1 -or $startedCount -ne 1) {
+            Write-Finding 'ERROR' 'L12-task-claim' $display "expected exactly one '- Status: active|blocked|done', '- Owner:', '- Branch:', '- Scope:' and '- Started: YYYY-MM-DD'"
+        }
+    }
 }
 
 # L6: task-board question references must exist in open questions.
@@ -227,6 +240,18 @@ if ((Test-Path -LiteralPath $boardPath -PathType Leaf) -and (Test-Path -LiteralP
     foreach ($m in [regex]::Matches($boardContent, 'Q-[A-Za-z0-9][A-Za-z0-9-]*')) {
         if (-not $questionContent.Contains($m.Value)) {
             Write-Finding 'ERROR' 'L6-orphan-question' '40__MEMORY/task_board.md' "$($m.Value) is not listed in 40__MEMORY/open_questions_for_human.md"
+        }
+    }
+}
+
+# L13: every TASK__<id> named on the board has a claim file.
+$tasksPath = Join-Path -Path $targetPath -ChildPath '40__MEMORY/tasks'
+if ((Test-Path -LiteralPath $boardPath -PathType Leaf) -and (Test-Path -LiteralPath $tasksPath -PathType Container)) {
+    $boardContent = Get-Content -LiteralPath $boardPath -Raw
+    foreach ($m in [regex]::Matches($boardContent, 'TASK__[A-Za-z0-9][A-Za-z0-9-]*')) {
+        $claimPath = Join-Path -Path $tasksPath -ChildPath "$($m.Value).md"
+        if (-not (Test-Path -LiteralPath $claimPath -PathType Leaf)) {
+            Write-Finding 'ERROR' 'L13-task-board-reference' '40__MEMORY/task_board.md' "$($m.Value) has no claim file in 40__MEMORY/tasks/"
         }
     }
 }

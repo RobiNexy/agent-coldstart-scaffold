@@ -173,7 +173,7 @@ EOF
   # L8: unknown type prefix.
   type="$(printf '%s' "$stem" | sed -nE 's/^([0-9]{2}__)?([A-Z][A-Z0-9]*)__.*/\2/p')"
   if [ -n "$type" ]; then
-    case " AGENT ADR FEATURE API DATA OPS SEQUENCE STATE DATAFLOW MODULE SUMMARY SOURCE RESEARCH REPORT " in
+    case " AGENT ADR FEATURE API DATA OPS SEQUENCE STATE DATAFLOW MODULE SUMMARY SOURCE RESEARCH REPORT TASK " in
       *" $type "*) ;;
       *) warn "L8-unknown-type" "$display" "unknown type prefix '$type' (see allowed types in 00__AGENT__START_HERE.md)" ;;
     esac
@@ -208,6 +208,25 @@ EOF
       fi
       ;;
   esac
+
+  # L12: active task claims carry owner, branch, scope and start date.
+  case "$stem" in
+    TASK__*)
+      status_count="$(grep -cE '^- Status: (active|blocked|done)$' "$file" || true)"
+      owner_count="$(grep -cE '^- Owner: .+' "$file" || true)"
+      branch_count="$(grep -cE '^- Branch: .+' "$file" || true)"
+      scope_count="$(grep -cE '^- Scope: .+' "$file" || true)"
+      started_count="$(grep -cE '^- Started: [0-9]{4}-[0-9]{2}-[0-9]{2}$' "$file" || true)"
+      [ -n "$status_count" ] || status_count=0
+      [ -n "$owner_count" ] || owner_count=0
+      [ -n "$branch_count" ] || branch_count=0
+      [ -n "$scope_count" ] || scope_count=0
+      [ -n "$started_count" ] || started_count=0
+      if [ "$status_count" -ne 1 ] || [ "$owner_count" -ne 1 ] || [ "$branch_count" -ne 1 ] || [ "$scope_count" -ne 1 ] || [ "$started_count" -ne 1 ]; then
+        err "L12-task-claim" "$display" "expected exactly one '- Status: active|blocked|done', '- Owner:', '- Branch:', '- Scope:' and '- Started: YYYY-MM-DD'"
+      fi
+      ;;
+  esac
 done < "$tmp/files"
 
 # L6: task-board question references must exist in open questions.
@@ -220,6 +239,22 @@ if [ -f "$TARGET/$board" ] && [ -f "$TARGET/$questions" ]; then
       [ -n "$ref" ] || continue
       if ! grep -Fq -- "$ref" "$TARGET/$questions"; then
         err "L6-orphan-question" "$board" "$ref is not listed in $questions"
+      fi
+    done <<EOF
+$refs
+EOF
+  fi
+fi
+
+# L13: every TASK__<id> named on the board has a claim file.
+tasks_dir="40__MEMORY/tasks"
+if [ -f "$TARGET/$board" ] && [ -d "$TARGET/$tasks_dir" ]; then
+  refs="$(grep -oE 'TASK__[A-Za-z0-9][A-Za-z0-9-]*' "$TARGET/$board" || true)"
+  if [ -n "$refs" ]; then
+    while IFS= read -r ref; do
+      [ -n "$ref" ] || continue
+      if [ ! -f "$TARGET/$tasks_dir/${ref}.md" ]; then
+        err "L13-task-board-reference" "$board" "$ref has no claim file in $tasks_dir/"
       fi
     done <<EOF
 $refs
