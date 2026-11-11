@@ -148,6 +148,16 @@ Agent 与人的互动密度由模式控制，默认值写在目标项目的 `20_
 
 `journal/` 超过 20 条或用户要求整理时，按 `AGENT__procedure__compaction.md` 执行 compaction：把持久事实蒸馏进现状、任务板、ADR 和待裁决文件，写一个 `SUMMARY__<起>_to_<止>.md`，删除原始条目（Git 保留历史），并向人类报告统计——中断次数、未验证次数、求助次数与类型、平均尝试次数。这些统计是判断这套工作流是否真的有效的依据。
 
+## 研究与长文
+
+`50__RESEARCH/` 是研究证据与长文层，独立于会话记忆：
+
+- `50__RESEARCH/sources/SOURCE__<id>.md`：一个来源一个文件，全项目共享、只追加；记录出处、访问日期、版本、方法与局限。
+- `50__RESEARCH/<topic>/RESEARCH__<question>.md`：问题契约、检索记录、证据表、结论与置信度。开头先写“支持哪个决策、什么证据算够、何时停止”。
+- `50__RESEARCH/<topic>/REPORT__<title>.md`：面向读者的长文，引用 `RESEARCH__` 与 `SOURCE__`。
+
+研究不是每个任务的必经阶段，只在决策依赖外部证据时触发。学术调研与技术调研共用同一结构，区别在证据标准：前者看同行评审、方法与复现，后者优先官方文档、源码、可复现的 benchmark 或 spike。程序见 `30__PROCEDURES/AGENT__procedure__research.md` 与 `AGENT__procedure__long-form-writing.md`。
+
 ## 宿主集成
 
 安装器会写入一个极薄的 `AGENTS.md`，内容是“先读 `00__AGENT__START_HERE.md` 并照做”。多数支持 `AGENTS.md` 的宿主会自动加载它。
