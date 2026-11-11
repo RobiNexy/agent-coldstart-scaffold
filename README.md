@@ -185,6 +185,8 @@ Agent 与人的互动密度由模式控制，默认值写在目标项目的 `20_
 | `L7-incomplete-journal` | WARN | 日志有 `Task` 无 `Did`（中断或未收尾） |
 | `L8-unknown-type` | WARN | 未知的类型前缀 |
 | `L9-journal-count` | WARN | 原始日志超过 20 条，建议 compaction |
+| `L10-research-metadata` | ERROR | `RESEARCH__*.md` 缺少唯一的 `- Question:`、合法 `- Status:` 或 `- As of:` |
+| `L11-source-metadata` | ERROR | `SOURCE__*.md` 缺少合法 `- Type:`、`- Citation:`/`- URL:` 或 `- Accessed:` |
 
 代码块与行内代码中的示例链接不参与 L1/L2，因此可以安全地在文档中展示 `[[name]]` 的写法。退出码：`0` 无错误，`1` 有错误，`2` 参数或环境错误。
 
@@ -213,7 +215,7 @@ Copy-Item (Join-Path $sourceDir 'templates/feature/_TEMPLATE__FEATURE.md') `
 
 安装器不会覆盖或删除已有文件，所以升级不只是“重跑安装器”。完整流程写在 [`UPGRADING.md`](UPGRADING.md)，由 Agent 在目标项目中逐项执行：识别已安装版本 → 列出新增与已改动文件 → 安装器补齐新文件 → 合并本地修改 → 清理旧路径 → 运行 `--verify`、`lint` 与词数检查。
 
-版本识别的依据是目标 `00__AGENT__START_HERE.md` 第一行的标记（例如 `<!-- agent-coldstart-scaffold entry v6.1.0 -->`）与源码根目录的 `VERSION`。两者不一致时，Agent 按 `UPGRADING.md` 的版本说明逐段升级。
+版本识别的依据是目标 `00__AGENT__START_HERE.md` 第一行的标记（例如 `<!-- agent-coldstart-scaffold entry v6.2.0 -->`）与源码根目录的 `VERSION`。两者不一致时，Agent 按 `UPGRADING.md` 的版本说明逐段升级。
 
 从 v5 或 v4.1 升级时，人工要点：
 

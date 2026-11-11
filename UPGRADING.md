@@ -17,7 +17,7 @@ The installer only adds missing files and never overwrites. An upgrade therefore
 The first line of the target `00__AGENT__START_HERE.md` carries the version marker:
 
 ```text
-<!-- agent-coldstart-scaffold entry v6.1.0 -->
+<!-- agent-coldstart-scaffold entry v6.2.0 -->
 ```
 
 The version in that marker is the installed version.
@@ -88,6 +88,19 @@ Apply every section between the installed and target versions.
   - `30__PROCEDURES/AGENT__procedure__paper-reading.md`
 - The installed procedures are new files, so the installer adds them. The entry gains a corresponding row in its "When you are about to…" table; merge that row into the existing entry without discarding local edits.
 - The entry marker changes from `v6` to `v6.1.0`. Update that one comment line; no other entry change is required.
+- No installed asset was removed and no directory was renamed.
+
+### 6.1.0 → 6.2.0
+
+- New installed assets:
+  - `50__RESEARCH/.gitkeep`
+  - `50__RESEARCH/sources/.gitkeep`
+  - `30__PROCEDURES/AGENT__procedure__research.md`
+  - `30__PROCEDURES/AGENT__procedure__long-form-writing.md`
+- New knowledge types: `SOURCE`, `RESEARCH` and `REPORT`. Merge the updated allowed-types line, the `50__RESEARCH/` row and the two procedure rows into the existing entry.
+- `lint` now reports `L10-research-metadata` and `L11-source-metadata`. Run it after the merge.
+- Templates under `templates/research/` belong to the source repository; copy one into the project when needed.
+- The entry marker changes to `v6.2.0`.
 - No installed asset was removed and no directory was renamed.
 
 ### Pre-v6 (v4.x, v5.x) → 6.x

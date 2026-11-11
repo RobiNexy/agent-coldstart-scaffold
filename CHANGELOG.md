@@ -2,6 +2,22 @@
 
 重要变更记录。每次发布前更新对应版本条目。
 
+## 6.2.0 — 2026-11-11
+
+### Added
+
+- `50__RESEARCH/`：研究证据与长文层。`sources/SOURCE__<id>.md` 一个来源一个文件，`<topic>/RESEARCH__<question>.md` 记录问题契约与综合，`<topic>/REPORT__<title>.md` 承载长文成品。
+- 新增默认程序 `AGENT__procedure__research.md`：先定义决策、证据标准与停止条件，再检索、抽取证据、综合；覆盖学术与技术两种证据剖面。
+- 新增默认程序 `AGENT__procedure__long-form-writing.md`：先搭论证图，再分遍起草，最后做引用完整性检查。
+- 新增知识类型 `SOURCE`、`RESEARCH`、`REPORT`，入口类型表与 `lint` 允许列表同步。
+- 新增模板 `templates/research/_TEMPLATE__RESEARCH.md`、`_TEMPLATE__SOURCE.md`、`_TEMPLATE__REPORT.md`。
+- `lint` 新增 `L10-research-metadata` 与 `L11-source-metadata`，两种实现与夹具同步。
+
+### Changed
+
+- 入口新增 `50__RESEARCH/` 位置行，以及 research / long-form-writing 两个触发项。
+- README 新增“研究与长文”章节，并补充研究层目录说明与 lint 检查项。
+
 ## 6.1.0 — 2026-11-11
 
 ### Added
