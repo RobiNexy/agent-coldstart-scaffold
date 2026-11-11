@@ -118,6 +118,9 @@ AGENTS.md                                   宿主钩子，只有一句指向入
   project_state_now.md
   task_board.md
   open_questions_for_human.md
+50__RESEARCH/                               研究证据与长文
+  sources/                                  一个来源一个文件（SOURCE__）
+  <topic>/                                  RESEARCH__ 与 REPORT__
 .gitignore                                  通用忽略项示例
 ```
 
@@ -177,7 +180,7 @@ Agent 与人的互动密度由模式控制，默认值写在目标项目的 `20_
 
 ## 按需使用模板
 
-模板位于仓库的 `templates/`，不属于默认安装资产：`decisions/`、`feature/`、`contracts/`、`data-models/`、`operations/` 与四类 `diagrams/`。只在确有需要时复制到合适位置，删除不适用的小节，并改成与内容匹配的文件名和标题。例如，`source_dir` 使用前文创建的源码目录：
+模板位于仓库的 `templates/`，不属于默认安装资产：`decisions/`、`feature/`、`contracts/`、`data-models/`、`operations/`、`research/` 与四类 `diagrams/`。只在确有需要时复制到合适位置，删除不适用的小节，并改成与内容匹配的文件名和标题。例如，`source_dir` 使用前文创建的源码目录：
 
 ```bash
 mkdir -p /path/to/your-project/design
