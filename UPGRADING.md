@@ -17,7 +17,7 @@ The installer only adds missing files and never overwrites. An upgrade therefore
 The first line of the target `00__AGENT__START_HERE.md` carries the version marker:
 
 ```text
-<!-- agent-coldstart-scaffold entry v6.2.0 -->
+<!-- agent-coldstart-scaffold entry v6.3.0 -->
 ```
 
 The version in that marker is the installed version.
@@ -101,6 +101,18 @@ Apply every section between the installed and target versions.
 - `lint` now reports `L10-research-metadata` and `L11-source-metadata`. Run it after the merge.
 - Templates under `templates/research/` belong to the source repository; copy one into the project when needed.
 - The entry marker changes to `v6.2.0`.
+- No installed asset was removed and no directory was renamed.
+
+### 6.2.0 → 6.3.0
+
+- New installed assets:
+  - `40__MEMORY/tasks/.gitkeep`
+  - `30__PROCEDURES/AGENT__procedure__parallel-work.md`
+- New knowledge type: `TASK`. Merge the updated allowed-types line, the `40__MEMORY/tasks/` row and the parallel-work row into the entry.
+- `40__MEMORY/task_board.md` changes its single-writer note to name the integrator and the claims directory. Merge that note; do not discard local board content.
+- `lint` now reports `L12-task-claim` and `L13-task-board-reference`. Run it after the merge.
+- `templates/tasks/_TEMPLATE__TASK.md` belongs to the source repository; copy it when needed.
+- The entry marker changes to `v6.3.0`.
 - No installed asset was removed and no directory was renamed.
 
 ### Pre-v6 (v4.x, v5.x) → 6.x

@@ -200,6 +200,8 @@ Agent 与人的互动密度由模式控制，默认值写在目标项目的 `20_
 | `L9-journal-count` | WARN | 原始日志超过 20 条，建议 compaction |
 | `L10-research-metadata` | ERROR | `RESEARCH__*.md` 缺少唯一的 `- Question:`、合法 `- Status:` 或 `- As of:` |
 | `L11-source-metadata` | ERROR | `SOURCE__*.md` 缺少合法 `- Type:`、`- Citation:`/`- URL:` 或 `- Accessed:` |
+| `L12-task-claim` | ERROR | `TASK__*.md` 缺少唯一的 `- Status:`、`- Owner:`、`- Branch:`、`- Scope:` 或 `- Started:` |
+| `L13-task-board-reference` | ERROR | 任务板引用的 `TASK__*` 在 `40__MEMORY/tasks/` 中没有对应文件 |
 
 代码块与行内代码中的示例链接不参与 L1/L2，因此可以安全地在文档中展示 `[[name]]` 的写法。退出码：`0` 无错误，`1` 有错误，`2` 参数或环境错误。
 

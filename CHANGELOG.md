@@ -2,6 +2,22 @@
 
 重要变更记录。每次发布前更新对应版本条目。
 
+## 6.3.0 — 2026-11-11
+
+### Added
+
+- `40__MEMORY/tasks/`：并行任务领取层。一个进行中的任务一个 `TASK__<id>.md`，记录 Owner、Status、Branch、Worktree、Scope、Started 与交接信息。
+- 新增默认程序 `AGENT__procedure__parallel-work.md`：按写入集合拆分任务，约定 worktree/分支、共享文件单写者、交接与集成顺序。
+- 新增知识类型 `TASK`，入口类型表与 `lint` 允许列表同步。
+- 新增模板 `templates/tasks/_TEMPLATE__TASK.md`。
+- `lint` 新增 `L12-task-claim` 与 `L13-task-board-reference`，两种实现与夹具同步。
+
+### Changed
+
+- `40__MEMORY/task_board.md` 说明改为：集成 session 是唯一写者，进行中的任务以 `tasks/` 为准。
+- 入口新增 `40__MEMORY/tasks/` 位置行与 parallel-work 触发项。
+- README 新增“并行会话”章节与两条 lint 检查说明。
+
 ## 6.2.0 — 2026-11-11
 
 ### Added
