@@ -98,6 +98,17 @@ AGENTS.md                                   宿主钩子，只有一句指向入
   domain_terminology_glossary.md
 30__PROCEDURES/                             做某类事时读取
   AGENT__procedure__adr.md
+  AGENT__procedure__formal-problem-solving.md
+  AGENT__procedure__cicd-pipeline.md
+  AGENT__procedure__docker-configuration.md
+  AGENT__procedure__git-discipline.md
+  AGENT__procedure__writing-user-manual.md
+  AGENT__procedure__go-engineering.md
+  AGENT__procedure__rust-engineering.md
+  AGENT__procedure__c-cpp-engineering.md
+  AGENT__procedure__latex-authoring.md
+  AGENT__procedure__design-language.md
+  AGENT__procedure__paper-reading.md
   AGENT__procedure__task_end.md
   AGENT__procedure__compaction.md
   AGENT__procedure__first_session.md
@@ -187,16 +198,20 @@ Copy-Item (Join-Path $sourceDir 'templates/feature/_TEMPLATE__FEATURE.md') `
 
 ## 升级
 
-安装器不会覆盖或删除已有文件。从 v5 或 v4.1 升级：
+安装器不会覆盖或删除已有文件，所以升级不只是“重跑安装器”。完整流程写在 [`UPGRADING.md`](UPGRADING.md)，由 Agent 在目标项目中逐项执行：识别已安装版本 → 列出新增与已改动文件 → 安装器补齐新文件 → 合并本地修改 → 清理旧路径 → 运行 `--verify`、`lint` 与词数检查。
 
-1. 重跑安装器；注意 `LEGACY` 行与 `Legacy paths found: N`。
-2. 把旧 `20__EDIT_BEFORE_SESSION_END/` 中 `project_state_now.md`、`task_board.md`、`open_questions_for_human.md` 的内容手工搬到 `40__MEMORY/` 对应文件。
+版本识别的依据是目标 `00__AGENT__START_HERE.md` 第一行的标记（例如 `<!-- agent-coldstart-scaffold entry v6.1.0 -->`）与源码根目录的 `VERSION`。两者不一致时，Agent 按 `UPGRADING.md` 的版本说明逐段升级。
+
+从 v5 或 v4.1 升级时，人工要点：
+
+1. 让 Agent 按 `UPGRADING.md` 执行，注意 `LEGACY` 行与 `Legacy paths found: N`。
+2. 把旧 `20__EDIT_BEFORE_SESSION_END/` 中 `project_state_now.md`、`task_board.md`、`open_questions_for_human.md` 的内容搬到 `40__MEMORY/` 对应文件。
 3. 把旧 `10__ALWAYS_LOAD_FIRST/` 中的项目目的、术语和编码约定搬到 `20__PROJECT_CONTEXT/`。
 4. 用脚手架源码中的 `00__AGENT__START_HERE.md` 覆盖旧入口；确认新入口能读到 `10__ALWAYS_LOAD/`。
-5. 删除旧目录 `10__ALWAYS_LOAD_FIRST/`、`20__EDIT_BEFORE_SESSION_END/`，以及 v4.1 的 `00__AGENT_START_HERE.md`、`core_mindset.md`、`workflow_rules_for_ai.md`。
+5. 确认迁移完成后再删除旧目录 `10__ALWAYS_LOAD_FIRST/`、`20__EDIT_BEFORE_SESSION_END/`，以及 v4.1 的 `00__AGENT_START_HERE.md`、`core_mindset.md`、`workflow_rules_for_ai.md`。
 6. 重跑 `--verify` 与 `lint.sh`，确认无缺失、无悬空链接。
 
-从 v4.1 升级时，旧文件会保留；确认新入口和规则可用后再删除，避免两份规则并存。旧版生成的设计模板与代码占位目录若仍存在，请先确认其中没有项目自有内容，再自行清理；新版模板位于发行包的 `templates/` 目录。
+旧文件会保留到确认新入口和规则可用之后，避免两份规则并存。旧版生成的设计模板与代码占位目录若仍存在，请先确认其中没有项目自有内容，再自行清理；新版模板位于发行包的 `templates/` 目录。
 
 ## 环境要求
 
@@ -214,7 +229,7 @@ Copy-Item (Join-Path $sourceDir 'templates/feature/_TEMPLATE__FEATURE.md') `
 
 ## 语言策略
 
-Agent 读取的文件（`scaffold/`、`templates/`、启动指引、安装器输出）使用英文，以便与多数宿主的系统提示和指令遵循语言一致。README、CHANGELOG 和 `docs/` 使用中文。项目自身内容（项目目的、约定、术语、日志）跟随项目实际语言。
+Agent 读取的文件（`scaffold/`、`templates/`、启动指引、安装器输出）使用英文，以便与多数宿主的系统提示和指令遵循语言一致。README、CHANGELOG 和 `docs/` 使用中文。项目自身内容（项目目的、约定、术语、日志）跟随项目实际语言。用户自有、按中文调优的提示词程序（如 `AGENT__procedure__paper-reading.md`）保留中文原文。
 
 ## 设计文档
 

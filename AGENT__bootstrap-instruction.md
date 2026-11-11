@@ -2,6 +2,8 @@
 
 When a user sends the URL of this repository in a project agent session, treat it as an installation request unless they state another purpose. Use only the exact URL the user provided (`ACS_REPOSITORY_URL`); never guess or substitute a repository address. The target is the project workspace explicitly selected by the host, not the scaffold source directory.
 
+If the target already contains `00__AGENT__START_HERE.md`, read the version marker on its first line and compare it with `VERSION` in the source. When the project is older, read `UPGRADING.md` from the source and follow it; the installer alone only adds files and does not merge changed ones.
+
 ## Target directory
 
 Prefer the workspace root explicitly provided by the agent host. If that path is a Git worktree, run `git -C <path> rev-parse --show-toplevel` and use its output. If the host provides no root, resolve the repository root from the current directory only when the current directory is inside a Git worktree; for a non-Git project, do not assume the current shell directory is the root — obtain an explicit workspace root from the host first. Ask first when the host specifies nothing or several candidates exist. An empty directory explicitly chosen by the host is also acceptable.

@@ -2,6 +2,30 @@
 
 重要变更记录。每次发布前更新对应版本条目。
 
+## 6.1.0 — 2026-11-11
+
+### Added
+
+- `UPGRADING.md`：Agent 执行的升级清单，覆盖版本识别、新增/改动文件分类、本地修改合并、旧路径清理、验证与收尾；不依赖新代码。
+- 新增默认程序 `AGENT__procedure__formal-problem-solving.md`：把计算问题先放进合适的数学结构，再按框架选择、形式化陈述、交叉论证、反例优先、落地与独立校验展开。
+- 新增默认程序 `AGENT__procedure__cicd-pipeline.md`：沿“提交 → 构建 → 验证 → 制品 → 部署 → 观测 → 回滚”定位 CI/CD 问题，优先检查可复现性、可观测性与可逆性。
+- 新增默认程序 `AGENT__procedure__docker-configuration.md`：把 Dockerfile 与 compose 视为“干净检出 → 可验证运行”的残留物，按构建期、运行期与环境三层划分边界。
+- 新增默认程序 `AGENT__procedure__git-discipline.md`：按历史的风险层级（本地未共享、共享分支、已发布引用）组织建议，先确认可逆性再操作。
+- 新增默认程序 `AGENT__procedure__writing-user-manual.md`：按读者目标组织手册，步骤可字面执行并附带可观察结果。
+- 新增默认程序 `AGENT__procedure__go-engineering.md`：围绕 goroutine/channel 所有权、context 传播与错误语义组织 Go 工程判断。
+- 新增默认程序 `AGENT__procedure__rust-engineering.md`：先把问题读成所有权图，再处理语法与 API，避免用克隆或 `unsafe` 绕过借用检查。
+- 新增默认程序 `AGENT__procedure__c-cpp-engineering.md`：区分代码意图、标准授权与平台实际行为，优先排查未定义行为与生命周期问题。
+- 新增默认程序 `AGENT__procedure__latex-authoring.md`：按源码意图 / 引擎行为 / 宏包交互三层定位问题，只处理日志中的第一条真实错误。
+- 新增默认程序 `AGENT__procedure__design-language.md`：先把对象还原为可证伪的设计语法，再把每条规则映射到可替换参数与实现代码。
+- 新增默认程序 `AGENT__procedure__paper-reading.md`：按“核心骨架 → 机制展开 → 批判分析”三层讲解论文，术语首现即定义，被跳过的推导必须恢复或标注原文缺失。该文件按用户要求保留中文。
+- 根目录 `VERSION` 文件，作为当前脚手架版本的唯一来源；入口标记同步为 `<!-- agent-coldstart-scaffold entry v6.1.0 -->`。
+- CI 校验 `VERSION` 与入口标记一致；Release 校验 tag 与 `VERSION` 一致。
+
+### Changed
+
+- README “升级”章节改为指向 `UPGRADING.md`，只保留人工要点，减少两处说明漂移。
+- `AGENT__bootstrap-instruction.md` 增加判断：目标项目已有旧版本时，先按 `UPGRADING.md` 升级，而不是只重跑安装器。
+
 ## 6.0.0 — 2026-11-10
 
 与 5.x 的资产结构不兼容。安装器只补齐新文件并对旧版路径输出 LEGACY 警告；升级步骤见 README“升级”。

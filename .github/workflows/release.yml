@@ -30,6 +30,13 @@ jobs:
             exit 1
           fi
 
+          version="${TAG#v}"
+          file_version="$(tr -d '[:space:]' < VERSION)"
+          if [ "$version" != "$file_version" ]; then
+            echo "Tag $TAG does not match VERSION $file_version" >&2
+            exit 1
+          fi
+
       - name: Build release archive
         id: package
         shell: bash

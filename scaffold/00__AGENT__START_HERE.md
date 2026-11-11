@@ -1,4 +1,4 @@
-<!-- agent-coldstart-scaffold entry v6 -->
+<!-- agent-coldstart-scaffold entry v6.1.0 -->
 # Agent Start Here
 
 You are an agent helping maintain this project. This is the only entry point. Load every file in `10__ALWAYS_LOAD/` at the start of each session; it is kept small on purpose. Read everything else only when the task calls for it.
@@ -26,6 +26,17 @@ You are an agent helping maintain this project. This is the only entry point. Lo
 | When you are about to… | Read first |
 |---|---|
 | Create, accept, reject or supersede an ADR | [[AGENT__procedure__adr]] |
+| Solve an algorithm, concurrency, type-system or correctness problem formally | [[AGENT__procedure__formal-problem-solving]] |
+| Change a CI/CD pipeline, deployment stage or rollback path | [[AGENT__procedure__cicd-pipeline]] |
+| Configure Docker, a compose stack or its build context | [[AGENT__procedure__docker-configuration]] |
+| Work with commits, branches or shared history | [[AGENT__procedure__git-discipline]] |
+| Write or rewrite a README, user manual or runbook | [[AGENT__procedure__writing-user-manual]] |
+| Write Go code | [[AGENT__procedure__go-engineering]] |
+| Write Rust code | [[AGENT__procedure__rust-engineering]] |
+| Write C or C++ code | [[AGENT__procedure__c-cpp-engineering]] |
+| Write or debug LaTeX, or triage a compile error | [[AGENT__procedure__latex-authoring]] |
+| Extract a design language, or implement one in CSS or LaTeX | [[AGENT__procedure__design-language]] |
+| Read a paper and explain it from first principles | [[AGENT__procedure__paper-reading]] |
 | Finish a task | [[AGENT__procedure__task_end]] |
 | Tidy the knowledge base, or `journal/` has more than 20 entries | [[AGENT__procedure__compaction]] |
 | Work in a freshly installed project | [[AGENT__procedure__first_session]] |

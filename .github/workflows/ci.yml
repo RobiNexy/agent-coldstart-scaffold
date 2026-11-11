@@ -100,6 +100,13 @@ jobs:
             exit 1
           fi
 
+          version="$(tr -d '[:space:]' < VERSION)"
+          marker="$(sed -n 's/.*agent-coldstart-scaffold entry v\([0-9][0-9.]*\).*/\1/p' scaffold/00__AGENT__START_HERE.md | head -n 1)"
+          if [ "$version" != "$marker" ]; then
+            echo "VERSION ($version) does not match the entry marker ($marker)" >&2
+            exit 1
+          fi
+
   powershell-installer:
     name: PowerShell installer (windows-latest)
     runs-on: windows-latest
