@@ -2,6 +2,24 @@
 
 重要变更记录。每次发布前更新对应版本条目。
 
+## 6.4.0 — 2026-11-12
+
+### Added
+
+- 新增知识类型 `TOOLS`：项目在 `20__PROJECT_CONTEXT/TOOLS__tool-registry.md` 登记外部工具的能力类别、状态、精确版本、来源、许可证、安装/调用/冒烟命令、校验和、数据类别与 gate 决策。
+- 新增默认程序 `AGENT__procedure__tooling.md`：定义 `candidate → declared → installed → verified → retired` 生命周期，规定未登记不调用、版本精确、二进制不入库、`.tools/` 只作本地缓存。
+- 新增模板 `templates/tooling/_TEMPLATE__TOOLS.md`。
+- `lint` 新增 `L14-tools-registry` 与 `L15-tools-gate`：前者校验登记表字段与精确版本，后者强制 `gate` 处于 `verified` 并链接至少一条 Accepted ADR；`Data: uploads` 在 `declared` 及以上同样需要 Accepted ADR。
+- 新增设计文档 `docs/TOOLING_DESIGN.md`：按形式化问题求解程序给出状态机、访问控制、信息流三重视角，以及反例、边界、落地与独立校验。
+
+### Changed
+
+- 入口允许类型表加入 `TOOLS`，位置表加入工具登记表，触发项加入 tooling 程序。
+- `project_conventions.md` 新增 External tools 小节，指向登记表与 tooling 程序；安装器不会覆盖已有约定文件，升级时需手动合并。
+- `scaffold/.gitignore` 忽略 `.tools/`，避免工具二进制进入 Git。
+- README 新增“工具层”章节，并补充默认安装文件、模板与 lint 检查说明。
+- 默认安装新增空登记表 `20__PROJECT_CONTEXT/TOOLS__tool-registry.md`，安装后即可通过 lint；没有工具是显式状态，不强制安装任何工具。
+
 ## 6.3.0 — 2026-11-11
 
 ### Added

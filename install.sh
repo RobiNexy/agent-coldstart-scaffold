@@ -107,7 +107,7 @@ while IFS= read -r -d '' rel; do
       echo "  SKIP    ${rel}"
       skipped=$((skipped + 1))
       if [ "$rel" = ".gitignore" ]; then
-        echo "          └ Target already has .gitignore; confirm it covers dependencies and build output"
+        echo "          └ Target already has .gitignore; confirm it covers dependencies, build output and .tools/"
       fi
       if [ "$rel" = "AGENTS.md" ]; then
         echo "          └ AGENTS.md already exists. Add this line to it so agent hosts load the workflow:"

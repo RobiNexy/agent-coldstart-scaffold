@@ -11,6 +11,8 @@ Read this when touching deployment, infrastructure, data migrations, or anything
 
 If any answer is "unknown", stop and ask before acting.
 
+Before closing a readiness review, check `secure.deps` and `secure.secrets` in `20__PROJECT_CONTEXT/TOOLS__tool-registry.md`. If either is absent, record the gap in `open_questions_for_human.md`; do not install a scanner unasked. The registry lifecycle is in [[AGENT__procedure__tooling]].
+
 ## Gaps worth flagging (write to `open_questions_for_human.md` as `Q-prod-<topic>`)
 
 | Area | Minimum worth having |

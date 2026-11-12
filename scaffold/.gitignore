@@ -8,4 +8,7 @@
 .DS_Store
 Thumbs.db
 
+# Project-local tool cache; keep binaries out of Git
+.tools/
+
 # Add dependency/build output patterns after the project's technology stack is chosen.

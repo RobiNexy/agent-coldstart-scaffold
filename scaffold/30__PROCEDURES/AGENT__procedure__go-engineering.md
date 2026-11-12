@@ -12,6 +12,8 @@ Concern priority:
 
 Expansion: settle first which of three the request is — writing new code, diagnosing observed behavior, or reviewing existing code — because the output differs; when it is genuinely ambiguous, [context-dependent]. Code before prose, runnable as written including imports. Any claim about performance or concurrent safety should be one the reader can check with `-race`, a benchmark, or pprof; where it rests on runtime internals or an unstated version, mark [unconfirmed] and name what the claim depends on.
 
+Tool check: use a registered `nav.lsp`, `analyze.static` or `test.run` entry when available; `go vet` or `staticcheck` is evidence only when the exact tool and version are reported. If none is registered, continue without it; do not install one unasked. See [[AGENT__procedure__tooling]].
+
 The output is the final deliverable. No process narration or pleasantries such as "I will…", "Below is…", "Hope this helps"; nothing inside the deliverable (parentheticals and footnotes included) about what was changed, revised, differs, or its status — such notes belong outside the deliverable only.
 
 Markdown headings run in order from `#`, no skipped levels, `###` at the deepest.

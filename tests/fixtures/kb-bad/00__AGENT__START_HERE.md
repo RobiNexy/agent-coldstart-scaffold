@@ -1,4 +1,4 @@
-<!-- agent-coldstart-scaffold entry v6.3.0 -->
+<!-- agent-coldstart-scaffold entry v6.4.0 -->
 # Agent Start Here
 
 You are an agent helping maintain this project. This is the only entry point. Load every file in `10__ALWAYS_LOAD/` at the start of each session; it is kept small on purpose. Read everything else only when the task calls for it.

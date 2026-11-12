@@ -81,6 +81,29 @@ done < "$tmp/files"
 LC_ALL=C sort "$tmp/stems" -o "$tmp/stems"
 LC_ALL=C sort "$tmp/stems" | uniq -d > "$tmp/duplicates"
 
+# Accepted ADR stems, for tool gate decisions.
+: > "$tmp/adr-accepted"
+while IFS= read -r file; do
+  base="$(basename "$file")"
+  stem="${base%.md}"
+  case "$stem" in
+    ADR__*)
+      if grep -qE '^- Status: Accepted$' "$file"; then
+        printf '%s\n' "$stem" >> "$tmp/adr-accepted"
+      fi
+      ;;
+  esac
+done < "$tmp/files"
+
+check_tool_field() {
+  local entry_file="$1" display="$2" entry_name="$3" pattern="$4" label="$5" count
+  count="$(grep -cE "$pattern" "$entry_file" || true)"
+  [ -n "$count" ] || count=0
+  if [ "$count" -ne 1 ]; then
+    err "L14-tools-registry" "$display" "tool '${entry_name}': expected exactly one ${label}"
+  fi
+}
+
 # Strip fenced code blocks (tracking backtick-run length so nested fences work)
 # and inline code spans, then print bare [[links]].
 extract_links() {
@@ -173,7 +196,7 @@ EOF
   # L8: unknown type prefix.
   type="$(printf '%s' "$stem" | sed -nE 's/^([0-9]{2}__)?([A-Z][A-Z0-9]*)__.*/\2/p')"
   if [ -n "$type" ]; then
-    case " AGENT ADR FEATURE API DATA OPS SEQUENCE STATE DATAFLOW MODULE SUMMARY SOURCE RESEARCH REPORT TASK " in
+    case " AGENT ADR FEATURE API DATA OPS SEQUENCE STATE DATAFLOW MODULE SUMMARY SOURCE RESEARCH REPORT TASK TOOLS " in
       *" $type "*) ;;
       *) warn "L8-unknown-type" "$display" "unknown type prefix '$type' (see allowed types in 00__AGENT__START_HERE.md)" ;;
     esac
@@ -225,6 +248,117 @@ EOF
       if [ "$status_count" -ne 1 ] || [ "$owner_count" -ne 1 ] || [ "$branch_count" -ne 1 ] || [ "$scope_count" -ne 1 ] || [ "$started_count" -ne 1 ]; then
         err "L12-task-claim" "$display" "expected exactly one '- Status: active|blocked|done', '- Owner:', '- Branch:', '- Scope:' and '- Started: YYYY-MM-DD'"
       fi
+      ;;
+  esac
+
+  # L14 / L15: tool registry schema and gate decisions.
+  case "$stem" in
+    TOOLS__*)
+      status_count="$(grep -cE '^- Status: (active|retired)$' "$file" || true)"
+      asof_count="$(grep -cE '^- As of: [0-9]{4}-[0-9]{2}-[0-9]{2}$' "$file" || true)"
+      [ -n "$status_count" ] || status_count=0
+      [ -n "$asof_count" ] || asof_count=0
+      if [ "$status_count" -ne 1 ] || [ "$asof_count" -ne 1 ]; then
+        err "L14-tools-registry" "$display" "expected exactly one '- Status: active|retired' and one '- As of: YYYY-MM-DD'"
+      fi
+
+      headings="$(grep -E '^## ' "$file" | sed 's/^## //' || true)"
+      if [ -n "$headings" ]; then
+        duplicates="$(printf '%s\n' "$headings" | LC_ALL=C sort | uniq -d || true)"
+        if [ -n "$duplicates" ]; then
+          while IFS= read -r duplicate; do
+            [ -n "$duplicate" ] || continue
+            err "L14-tools-registry" "$display" "duplicate tool entry '${duplicate}'"
+          done <<EOF
+$duplicates
+EOF
+        fi
+      fi
+
+      rm -rf "$tmp/tools"
+      mkdir -p "$tmp/tools"
+      awk -v dir="$tmp/tools" '
+        /^## / {
+          n++
+          file = dir "/entry-" n
+          print > file
+          next
+        }
+        file != "" { print >> file }
+      ' "$file"
+
+      for entry_file in "$tmp/tools"/*; do
+        [ -f "$entry_file" ] || continue
+        entry_name="$(head -n 1 "$entry_file" | sed 's/^##[[:space:]]*//')"
+        if [ -z "$entry_name" ]; then
+          err "L14-tools-registry" "$display" "empty tool heading"
+          continue
+        fi
+        if ! printf '%s' "$entry_name" | grep -qE '^[a-z][a-z0-9-]*$'; then
+          err "L14-tools-registry" "$display" "tool '${entry_name}': id must match ^[a-z][a-z0-9-]*$"
+        fi
+
+        check_tool_field "$entry_file" "$display" "$entry_name" '^- Category: [a-z][a-z0-9]*(\.[a-z][a-z0-9]*)?$' "'- Category:' with a dotted lowercase identifier"
+        check_tool_field "$entry_file" "$display" "$entry_name" '^- State: (candidate|declared|installed|verified|retired)$' "'- State:'"
+        check_tool_field "$entry_file" "$display" "$entry_name" '^- Version: .+$' "'- Version:'"
+        check_tool_field "$entry_file" "$display" "$entry_name" '^- Provenance: .+$' "'- Provenance:'"
+        check_tool_field "$entry_file" "$display" "$entry_name" '^- License: .+$' "'- License:'"
+        check_tool_field "$entry_file" "$display" "$entry_name" '^- Install: .+$' "'- Install:'"
+        check_tool_field "$entry_file" "$display" "$entry_name" '^- Invoke: .+$' "'- Invoke:'"
+        check_tool_field "$entry_file" "$display" "$entry_name" '^- Mode: (advisory|gate)$' "'- Mode:'"
+        check_tool_field "$entry_file" "$display" "$entry_name" '^- Scope: (local|ci|both)$' "'- Scope:'"
+        check_tool_field "$entry_file" "$display" "$entry_name" '^- Data: (local|downloads|uploads)$' "'- Data:'"
+
+        version="$(sed -nE 's/^- Version: (.*)$/\1/p' "$entry_file" | head -n 1)"
+        case "$version" in
+          latest|stable|current|main|master|HEAD|'*'|'^'*|'~'*|'>'*|'<'*|*.[xX]|[xX].*|*' '*)
+            err "L14-tools-registry" "$display" "tool '${entry_name}': '- Version:' must be exact, not '${version}'"
+            ;;
+        esac
+
+        state="$(sed -nE 's/^- State: (candidate|declared|installed|verified|retired)$/\1/p' "$entry_file" | head -n 1)"
+        mode="$(sed -nE 's/^- Mode: (advisory|gate)$/\1/p' "$entry_file" | head -n 1)"
+        data_class="$(sed -nE 's/^- Data: (local|downloads|uploads)$/\1/p' "$entry_file" | head -n 1)"
+
+        if [ "$state" = "installed" ] || [ "$state" = "verified" ]; then
+          check_tool_field "$entry_file" "$display" "$entry_name" '^- Checksum: (sha256:[0-9a-fA-F]{64}|package-manager:.+)$' "'- Checksum:' (sha256 or package-manager)"
+        fi
+        if [ "$state" = "verified" ]; then
+          check_tool_field "$entry_file" "$display" "$entry_name" '^- Smoke: .+$' "'- Smoke:'"
+          check_tool_field "$entry_file" "$display" "$entry_name" '^- Last verified: [0-9]{4}-[0-9]{2}-[0-9]{2}$' "'- Last verified: YYYY-MM-DD'"
+        fi
+
+        decision_count="$(grep -cE '^- Decision: .+' "$entry_file" || true)"
+        [ -n "$decision_count" ] || decision_count=0
+
+        if [ "$mode" = "gate" ] && [ "$state" != "verified" ]; then
+          err "L15-tools-gate" "$display" "tool '${entry_name}': Mode: gate requires State: verified (found '${state:-missing}')"
+        fi
+        if [ "$state" = "retired" ] && [ "$mode" = "gate" ]; then
+          err "L15-tools-gate" "$display" "tool '${entry_name}': retired tools must not be Mode: gate"
+        fi
+        if { [ "$mode" = "gate" ] || { [ "$data_class" = "uploads" ] && [ "$state" != "candidate" ]; }; } && [ "$decision_count" -eq 0 ]; then
+          err "L15-tools-gate" "$display" "tool '${entry_name}': Mode: gate and declared Data: uploads require a Decision: [[ADR__...]] link"
+        fi
+        if [ "$decision_count" -gt 0 ]; then
+          accepted=0
+          decision_links="$(grep -E '^- Decision:' "$entry_file" | grep -oE '\[\[ADR__[^]]+\]\]' | sed -e 's/^\[\[//' -e 's/\]\]$//' -e 's/|.*$//' -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' || true)"
+          if [ -n "$decision_links" ]; then
+            while IFS= read -r link; do
+              [ -n "$link" ] || continue
+              if grep -Fxq -- "$link" "$tmp/adr-accepted"; then
+                accepted=$((accepted + 1))
+              fi
+            done <<EOF
+$decision_links
+EOF
+          fi
+          if [ "$accepted" -eq 0 ]; then
+            err "L15-tools-gate" "$display" "tool '${entry_name}': Decision must link at least one Accepted ADR"
+          fi
+        fi
+      done
+      rm -rf "$tmp/tools"
       ;;
   esac
 done < "$tmp/files"

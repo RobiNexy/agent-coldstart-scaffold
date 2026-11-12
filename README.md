@@ -96,9 +96,11 @@ AGENTS.md                                   宿主钩子，只有一句指向入
   project_purpose_and_boundary.md
   project_conventions.md                    命令、环境、Git、默认协作模式
   domain_terminology_glossary.md
+  TOOLS__tool-registry.md                   外部工具登记、版本、校验和与 gate 决策
 30__PROCEDURES/                             做某类事时读取
   AGENT__procedure__adr.md
   AGENT__procedure__formal-problem-solving.md
+  AGENT__procedure__tooling.md              外部工具的提出、安装、验证、gate 与退役
   AGENT__procedure__cicd-pipeline.md
   AGENT__procedure__docker-configuration.md
   AGENT__procedure__git-discipline.md
@@ -171,6 +173,30 @@ Agent 与人的互动密度由模式控制，默认值写在目标项目的 `20_
 
 完整规则见 `30__PROCEDURES/AGENT__procedure__parallel-work.md`。
 
+## 工具层
+
+工具层分两层：框架定义基线能力、能力类别、登记表 schema、生命周期和治理规则；项目在 `20__PROJECT_CONTEXT/TOOLS__tool-registry.md` 登记实际使用的第三方工具。框架不硬编码具体第三方工具，`clangd`、`gopls`、`rust-analyzer`、TLC 都只是项目条目。
+
+基线能力——`lint.sh`/`lint.ps1`、`bash`/`pwsh`、`git`、`ls`/`find`/`grep`，以及可选的 `rg`（没有时回退 `grep`）——不进入登记表。只有项目引入或替换的第三方工具才登记；LSP、语言分析器、模型检查器和证明助手没有基线，必须先登记。
+
+每个工具条目记录：
+
+| 字段 | 作用 |
+|---|---|
+| `Category` | 能力槽位，例如 `nav.lsp`、`analyze.static`、`verify.model` |
+| `State` | `candidate`、`declared`、`installed`、`verified`、`retired` |
+| `Version` / `Provenance` / `License` | 精确版本、来源、许可证；禁止 `latest` |
+| `Install` / `Invoke` / `Smoke` | 安装、调用、冒烟验证命令 |
+| `Mode` / `Scope` | `advisory` 或 `gate`；`local`、`ci` 或 `both` |
+| `Data` | `local`、`downloads` 或 `uploads` |
+| `Checksum` | 下载件用 `sha256:`，包管理器用 `package-manager:<lockfile>` |
+| `Decision` | `gate` 条目，以及 `declared` 及以上的 `uploads` 条目，必须链接至少一条 Accepted ADR |
+| `Last verified` | 最后一次冒烟通过的日期 |
+
+只有 `verified` 条目才能用于任务；只有 `verified` 且链接了 Accepted ADR 的工具才能升为 `gate`。`Data: uploads` 的条目在进入 `declared` 前必须链接 Accepted ADR，并且每次外发仍受 `AGENT__rules` 的授权约束。工具二进制不提交进仓库，放在 `.tools/`（已加入 `.gitignore`）。
+
+`TOOLS` 是新增的知识类型，登记表文件名为 `TOOLS__tool-registry.md`。完整设计、反例与边界见 [`docs/TOOLING_DESIGN.md`](docs/TOOLING_DESIGN.md)，操作程序见 `30__PROCEDURES/AGENT__procedure__tooling.md`。
+
 ## 宿主集成
 
 安装器会写入一个极薄的 `AGENTS.md`，内容是“先读 `00__AGENT__START_HERE.md` 并照做”。多数支持 `AGENTS.md` 的宿主会自动加载它。
@@ -202,12 +228,14 @@ Agent 与人的互动密度由模式控制，默认值写在目标项目的 `20_
 | `L11-source-metadata` | ERROR | `SOURCE__*.md` 缺少合法 `- Type:`、`- Citation:`/`- URL:` 或 `- Accessed:` |
 | `L12-task-claim` | ERROR | `TASK__*.md` 缺少唯一的 `- Status:`、`- Owner:`、`- Branch:`、`- Scope:` 或 `- Started:` |
 | `L13-task-board-reference` | ERROR | 任务板引用的 `TASK__*` 在 `40__MEMORY/tasks/` 中没有对应文件 |
+| `L14-tools-registry` | ERROR | `TOOLS__*.md` 缺少头部字段，或条目缺少/重复必填字段；`installed`/`verified` 缺 `Checksum`，`verified` 缺 `Smoke`/`Last verified`；版本不得为 `latest`、范围或通配 |
+| `L15-tools-gate` | ERROR | `gate` 未处于 `verified`，`gate` 或 `declared` 及以上的 `uploads` 未链接 Accepted ADR，或 `retired` 仍为 `gate` |
 
 代码块与行内代码中的示例链接不参与 L1/L2，因此可以安全地在文档中展示 `[[name]]` 的写法。退出码：`0` 无错误，`1` 有错误，`2` 参数或环境错误。
 
 ## 按需使用模板
 
-模板位于仓库的 `templates/`，不属于默认安装资产：`decisions/`、`feature/`、`contracts/`、`data-models/`、`operations/`、`research/`、`tasks/` 与四类 `diagrams/`。只在确有需要时复制到合适位置，删除不适用的小节，并改成与内容匹配的文件名和标题。例如，`source_dir` 使用前文创建的源码目录：
+模板位于仓库的 `templates/`，不属于默认安装资产：`decisions/`、`feature/`、`contracts/`、`data-models/`、`operations/`、`research/`、`tasks/`、`tooling/` 与四类 `diagrams/`。只在确有需要时复制到合适位置，删除不适用的小节，并改成与内容匹配的文件名和标题。例如，`source_dir` 使用前文创建的源码目录：
 
 ```bash
 mkdir -p /path/to/your-project/design
@@ -263,7 +291,7 @@ Agent 读取的文件（`scaffold/`、`templates/`、启动指引、安装器输
 
 ## 设计文档
 
-`docs/` 中保存 v2、v3 的设计存档，以及 v6 的执行规划 [`docs/V6_PLAN.md`](docs/V6_PLAN.md)，仅供参考。当前工作流以 `scaffold/10__ALWAYS_LOAD/` 与本 README 为准。
+`docs/` 中保存 v2、v3 的设计存档，以及 v6 的执行规划 [`docs/V6_PLAN.md`](docs/V6_PLAN.md)，仅供参考。工具层设计见 [`docs/TOOLING_DESIGN.md`](docs/TOOLING_DESIGN.md)。当前工作流以 `scaffold/10__ALWAYS_LOAD/` 与本 README 为准。
 
 ## License
 

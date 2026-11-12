@@ -12,4 +12,6 @@ Run this when `20__PROJECT_CONTEXT/project_conventions.md` still says "unknown" 
 5. If the project is meant to go to production, run through [[AGENT__procedure__production_readiness]] and record gaps in `open_questions_for_human.md` — do not fix them unasked.
 6. Close with a journal entry.
 
+Tool candidates: after detecting the stack, add proposed tools to `20__PROJECT_CONTEXT/TOOLS__tool-registry.md` as `State: candidate` and follow [[AGENT__procedure__tooling]]. Propose only; do not install in this procedure.
+
 Do not create directories, move code, or install tools during this procedure.

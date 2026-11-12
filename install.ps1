@@ -165,7 +165,7 @@ foreach ($asset in $assets) {
             Write-Host "  SKIP    $relativePath"
             $skipped++
             if ($relativePath -eq '.gitignore') {
-                Write-Host '          └ Target already has .gitignore; confirm it covers dependencies and build output'
+                Write-Host '          └ Target already has .gitignore; confirm it covers dependencies, build output and .tools/'
             }
             if ($relativePath -eq 'AGENTS.md') {
                 Write-Host '          └ AGENTS.md already exists. Add this line to it so agent hosts load the workflow:'

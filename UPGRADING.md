@@ -17,7 +17,7 @@ The installer only adds missing files and never overwrites. An upgrade therefore
 The first line of the target `00__AGENT__START_HERE.md` carries the version marker:
 
 ```text
-<!-- agent-coldstart-scaffold entry v6.3.0 -->
+<!-- agent-coldstart-scaffold entry v6.4.0 -->
 ```
 
 The version in that marker is the installed version.
@@ -113,6 +113,19 @@ Apply every section between the installed and target versions.
 - `lint` now reports `L12-task-claim` and `L13-task-board-reference`. Run it after the merge.
 - `templates/tasks/_TEMPLATE__TASK.md` belongs to the source repository; copy it when needed.
 - The entry marker changes to `v6.3.0`.
+- No installed asset was removed and no directory was renamed.
+
+### 6.3.0 → 6.4.0
+
+- New installed assets:
+  - `20__PROJECT_CONTEXT/TOOLS__tool-registry.md`
+  - `30__PROCEDURES/AGENT__procedure__tooling.md`
+- New knowledge type: `TOOLS`. Merge the updated allowed-types line, the `20__PROJECT_CONTEXT/TOOLS__tool-registry.md` row and the tooling procedure row into the entry.
+- `20__PROJECT_CONTEXT/project_conventions.md` gains an "External tools" section. Merge it into the existing file; the installer will not overwrite that file.
+- `lint` now reports `L14-tools-registry` and `L15-tools-gate`. Run it after the merge. The empty default registry must pass.
+- `templates/tooling/_TEMPLATE__TOOLS.md` belongs to the source repository; copy it when a tool entry needs a starting point.
+- `scaffold/.gitignore` now ignores `.tools/`. If the target has its own `.gitignore`, add `.tools/` there instead; the installer will not overwrite it.
+- The entry marker changes to `v6.4.0`.
 - No installed asset was removed and no directory was renamed.
 
 ### Pre-v6 (v4.x, v5.x) → 6.x

@@ -12,6 +12,8 @@ Priorities:
 
 How to proceed: use the pipeline itself as the spine — commit → build → verify → artifact → deploy → observe → rollback. Expand only the stages where something is actually wrong and dispose of the rest in a line. When the config or pipeline fragment is in hand, give the minimal change for that stage together with what it buys and what it costs. With prose only, stay at the tradeoff level and do not invent YAML. Remain tool-agnostic — name the mechanism ("this is usually handled by X") rather than a product, unless the platform is already fixed.
 
+Gate check: only a `Mode: gate` tool whose `Scope` includes `ci` may fail the pipeline; see [[AGENT__procedure__tooling]]. An `advisory` tool reports but does not block, and a gate failure is not fixed by deleting the check or lowering the threshold without a new decision.
+
 Deliver the result as final. No "I will…", "Here is…", "hope this helps", no process narration or pleasantries; nothing inside the artifact (including parentheticals and footnotes) describing what was changed, revised, or differs from a previous version — such notes belong outside the artifact only.
 
 Markdown headings start at `#` and descend without skipping levels, to a maximum depth of `###`.

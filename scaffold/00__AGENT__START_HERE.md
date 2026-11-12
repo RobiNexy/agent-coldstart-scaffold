@@ -1,4 +1,4 @@
-<!-- agent-coldstart-scaffold entry v6.3.0 -->
+<!-- agent-coldstart-scaffold entry v6.4.0 -->
 # Agent Start Here
 
 You are an agent helping maintain this project. This is the only entry point. Load every file in `10__ALWAYS_LOAD/` at the start of each session; it is kept small on purpose. Read everything else only when the task calls for it.
@@ -7,7 +7,7 @@ You are an agent helping maintain this project. This is the only entry point. Lo
 
 1. Run `ls -F .` and, if this is a Git repository, `git status --short`. Never overwrite or discard changes you did not make.
 2. Run `ls 40__MEMORY/journal/` and read the newest entry. If it has a `Task:` line but no `Did:` line, the previous session was interrupted: read that entry fully before anything else.
-3. Read what the task needs: `20__PROJECT_CONTEXT/project_conventions.md` for commands and environments, relevant design docs, relevant code. If the task is clear and local, start. Ask only when different readings would materially change the result.
+3. Read what the task needs: `20__PROJECT_CONTEXT/project_conventions.md` for commands and environments, `20__PROJECT_CONTEXT/TOOLS__tool-registry.md` for external tools, relevant design docs, relevant code. If the task is clear and local, start. Ask only when different readings would materially change the result.
 4. When a task ends, follow [[AGENT__procedure__task_end]].
 
 ## Where things are
@@ -21,6 +21,7 @@ You are an agent helping maintain this project. This is the only entry point. Lo
 | What is true now / unfinished work / decisions awaiting a human | `40__MEMORY/project_state_now.md`, `task_board.md`, `open_questions_for_human.md` |
 | Active work claims and ownership | `40__MEMORY/tasks/` |
 | Research questions, sources and long-form reports | `50__RESEARCH/` |
+| Tools the project may use, and their gate status | `20__PROJECT_CONTEXT/TOOLS__tool-registry.md` |
 | Design documents | The project's chosen directory; `design/` if none exists |
 | Who references a file | `rg -nF '[[ADR__example' .` |
 | Human raw material | Optional `human-source/`: read-only, cite it, never edit or move it |
@@ -41,6 +42,7 @@ You are an agent helping maintain this project. This is the only entry point. Lo
 | Research a question, compare options or gather evidence | [[AGENT__procedure__research]] |
 | Write a long-form report, proposal or article | [[AGENT__procedure__long-form-writing]] |
 | Run two or more sessions in parallel, or hand work between sessions | [[AGENT__procedure__parallel-work]] |
+| Install, invoke, gate or retire an external tool | [[AGENT__procedure__tooling]] |
 | Read a paper and explain it from first principles | [[AGENT__procedure__paper-reading]] |
 | Finish a task | [[AGENT__procedure__task_end]] |
 | Tidy the knowledge base, or `journal/` has more than 20 entries | [[AGENT__procedure__compaction]] |
@@ -51,7 +53,7 @@ You are an agent helping maintain this project. This is the only entry point. Lo
 
 Knowledge files are named `TYPE__conclusion-or-topic.md`. The title (first `#` heading) equals the filename stem. Link with `[[filename]]`; targets must be unique in the repository.
 
-Allowed types: `AGENT` (controls agent behavior), `ADR`, `FEATURE`, `API`, `DATA`, `OPS`, `SEQUENCE`, `STATE`, `DATAFLOW`, `MODULE`, `SUMMARY` (journal compaction output), `SOURCE` (one evidence source), `RESEARCH` (one investigation), `REPORT` (reader-facing long-form deliverable), `TASK` (one active work claim). Adding a type is a decision: ask first.
+Allowed types: `AGENT` (controls agent behavior), `ADR`, `FEATURE`, `API`, `DATA`, `OPS`, `SEQUENCE`, `STATE`, `DATAFLOW`, `MODULE`, `SUMMARY` (journal compaction output), `SOURCE` (one evidence source), `RESEARCH` (one investigation), `REPORT` (reader-facing long-form deliverable), `TASK` (one active work claim), `TOOLS` (external tool registry). Adding a type is a decision: ask first.
 
 A name must never mislead someone who only sees the listing. Prefer conclusions over topics: `ADR__use-postgres-for-jsonb` beats `ADR__database-choice`. Negative conclusions are valuable: `ADR__do-not-use-orm`.
 

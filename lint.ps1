@@ -57,7 +57,7 @@ $excluded = @(
 $allowedTypes = @(
     'AGENT', 'ADR', 'FEATURE', 'API', 'DATA', 'OPS',
     'SEQUENCE', 'STATE', 'DATAFLOW', 'MODULE', 'SUMMARY',
-    'SOURCE', 'RESEARCH', 'REPORT', 'TASK'
+    'SOURCE', 'RESEARCH', 'REPORT', 'TASK', 'TOOLS'
 )
 
 $script:errors = 0
@@ -74,6 +74,25 @@ function Write-Finding {
         Write-Host ('{0,-6} {1,-22} {2}: {3}' -f $Level, $Code, $Path, $Message)
     }
     if ($Level -eq 'ERROR') { $script:errors++ } else { $script:warnings++ }
+}
+
+function Get-MultilineMatchCount {
+    param([string] $Text, [string] $Pattern)
+    return @([regex]::Matches($Text, $Pattern, [System.Text.RegularExpressions.RegexOptions]::Multiline)).Count
+}
+
+function Test-ToolField {
+    param(
+        [string] $Body,
+        [string] $Display,
+        [string] $EntryName,
+        [string] $Pattern,
+        [string] $Label
+    )
+    $count = Get-MultilineMatchCount $Body $Pattern
+    if ($count -ne 1) {
+        Write-Finding 'ERROR' 'L14-tools-registry' $Display "tool '$EntryName': expected exactly one $Label"
+    }
 }
 
 function Get-RelativeDisplay {
@@ -135,6 +154,15 @@ foreach ($file in $files) {
     $stems.Add([System.IO.Path]::GetFileNameWithoutExtension($file.Name))
 }
 $duplicateStems = @($stems | Group-Object | Where-Object { $_.Count -gt 1 } | ForEach-Object { $_.Name })
+
+$acceptedAdrs = @{}
+foreach ($file in $files) {
+    $stem = [System.IO.Path]::GetFileNameWithoutExtension($file.Name)
+    if ($stem.StartsWith('ADR__')) {
+        $content = (Get-Content -LiteralPath $file.FullName -Raw) -replace "`r`n", "`n"
+        if ($content -match '(?m)^- Status: Accepted$') { $acceptedAdrs[$stem] = $true }
+    }
+}
 
 foreach ($file in $files) {
     $display = Get-RelativeDisplay -FullName $file.FullName
@@ -227,6 +255,97 @@ foreach ($file in $files) {
         $startedCount = @($lines | Where-Object { $_ -match '^- Started: [0-9]{4}-[0-9]{2}-[0-9]{2}$' }).Count
         if ($statusCount -ne 1 -or $ownerCount -ne 1 -or $branchCount -ne 1 -or $scopeCount -ne 1 -or $startedCount -ne 1) {
             Write-Finding 'ERROR' 'L12-task-claim' $display "expected exactly one '- Status: active|blocked|done', '- Owner:', '- Branch:', '- Scope:' and '- Started: YYYY-MM-DD'"
+        }
+    }
+
+    # L14 / L15: tool registry schema and gate decisions.
+    if ($stem.StartsWith('TOOLS__')) {
+        $content = (Get-Content -LiteralPath $file.FullName -Raw) -replace "`r`n", "`n"
+        $statusCount = Get-MultilineMatchCount $content '^- Status: (active|retired)$'
+        $asOfCount = Get-MultilineMatchCount $content '^- As of: [0-9]{4}-[0-9]{2}-[0-9]{2}$'
+        if ($statusCount -ne 1 -or $asOfCount -ne 1) {
+            Write-Finding 'ERROR' 'L14-tools-registry' $display "expected exactly one '- Status: active|retired' and one '- As of: YYYY-MM-DD'"
+        }
+
+        $headings = @([regex]::Matches($content, '(?m)^## (.+)$') | ForEach-Object { $_.Groups[1].Value.Trim() })
+        $duplicateHeadings = @($headings | Group-Object | Where-Object { $_.Count -gt 1 })
+        foreach ($duplicate in $duplicateHeadings) {
+            Write-Finding 'ERROR' 'L14-tools-registry' $display "duplicate tool entry '$($duplicate.Name)'"
+        }
+
+        $entryMatches = [regex]::Matches($content, '(?ms)^## (.+?)\r?\n(.*?)(?=^## |\z)')
+        foreach ($entryMatch in $entryMatches) {
+            $entryName = $entryMatch.Groups[1].Value.Trim()
+            $body = $entryMatch.Groups[2].Value
+            if ([string]::IsNullOrWhiteSpace($entryName)) {
+                Write-Finding 'ERROR' 'L14-tools-registry' $display 'empty tool heading'
+                continue
+            }
+            if ($entryName -notmatch '^[a-z][a-z0-9-]*$') {
+                Write-Finding 'ERROR' 'L14-tools-registry' $display "tool '$entryName': id must match ^[a-z][a-z0-9-]*$"
+            }
+
+            Test-ToolField $body $display $entryName '^- Category: [a-z][a-z0-9]*(\.[a-z][a-z0-9]*)?$' "'- Category:' with a dotted lowercase identifier"
+            Test-ToolField $body $display $entryName '^- State: (candidate|declared|installed|verified|retired)$' "'- State:'"
+            Test-ToolField $body $display $entryName '^- Version: .+$' "'- Version:'"
+            Test-ToolField $body $display $entryName '^- Provenance: .+$' "'- Provenance:'"
+            Test-ToolField $body $display $entryName '^- License: .+$' "'- License:'"
+            Test-ToolField $body $display $entryName '^- Install: .+$' "'- Install:'"
+            Test-ToolField $body $display $entryName '^- Invoke: .+$' "'- Invoke:'"
+            Test-ToolField $body $display $entryName '^- Mode: (advisory|gate)$' "'- Mode:'"
+            Test-ToolField $body $display $entryName '^- Scope: (local|ci|both)$' "'- Scope:'"
+            Test-ToolField $body $display $entryName '^- Data: (local|downloads|uploads)$' "'- Data:'"
+
+            $versionMatch = [regex]::Match($body, '(?m)^- Version: (.+)$')
+            $version = if ($versionMatch.Success) { $versionMatch.Groups[1].Value } else { '' }
+            $badVersion = ($version -match '^(latest|stable|current|main|master|HEAD|\*)$') -or
+                ($version -match '^[\^~<>]') -or
+                ($version -match '\.[xX]$') -or
+                ($version -match '^[xX]\.') -or
+                ($version -match '\s')
+            if ($badVersion) {
+                Write-Finding 'ERROR' 'L14-tools-registry' $display "tool '$entryName': '- Version:' must be exact, not '$version'"
+            }
+
+            $stateMatch = [regex]::Match($body, '(?m)^- State: (candidate|declared|installed|verified|retired)$')
+            $state = if ($stateMatch.Success) { $stateMatch.Groups[1].Value } else { '' }
+            $modeMatch = [regex]::Match($body, '(?m)^- Mode: (advisory|gate)$')
+            $mode = if ($modeMatch.Success) { $modeMatch.Groups[1].Value } else { '' }
+            $dataMatch = [regex]::Match($body, '(?m)^- Data: (local|downloads|uploads)$')
+            $dataClass = if ($dataMatch.Success) { $dataMatch.Groups[1].Value } else { '' }
+
+            if ($state -eq 'installed' -or $state -eq 'verified') {
+                Test-ToolField $body $display $entryName '^- Checksum: (sha256:[0-9a-fA-F]{64}|package-manager:.+)$' "'- Checksum:' (sha256 or package-manager)"
+            }
+            if ($state -eq 'verified') {
+                Test-ToolField $body $display $entryName '^- Smoke: .+$' "'- Smoke:'"
+                Test-ToolField $body $display $entryName '^- Last verified: [0-9]{4}-[0-9]{2}-[0-9]{2}$' "'- Last verified: YYYY-MM-DD'"
+            }
+
+            $decisionCount = Get-MultilineMatchCount $body '^- Decision: .+$'
+            if ($mode -eq 'gate' -and $state -ne 'verified') {
+                Write-Finding 'ERROR' 'L15-tools-gate' $display "tool '$entryName': Mode: gate requires State: verified (found '$state')"
+            }
+            if ($state -eq 'retired' -and $mode -eq 'gate') {
+                Write-Finding 'ERROR' 'L15-tools-gate' $display "tool '$entryName': retired tools must not be Mode: gate"
+            }
+            if ((($mode -eq 'gate') -or ($dataClass -eq 'uploads' -and $state -ne 'candidate')) -and $decisionCount -eq 0) {
+                Write-Finding 'ERROR' 'L15-tools-gate' $display "tool '$entryName': Mode: gate and declared Data: uploads require a Decision: [[ADR__...]] link"
+            }
+            if ($decisionCount -gt 0) {
+                $acceptedHit = $false
+                foreach ($decisionLine in [regex]::Matches($body, '(?m)^- Decision: .+$')) {
+                    foreach ($linkMatch in [regex]::Matches($decisionLine.Value, '\[\[([^\]]+)\]\]')) {
+                        $link = $linkMatch.Groups[1].Value.Split('|')[0].Trim()
+                        if ($link.StartsWith('ADR__') -and $acceptedAdrs.ContainsKey($link)) {
+                            $acceptedHit = $true
+                        }
+                    }
+                }
+                if (-not $acceptedHit) {
+                    Write-Finding 'ERROR' 'L15-tools-gate' $display "tool '$entryName': Decision must link at least one Accepted ADR"
+                }
+            }
         }
     }
 }

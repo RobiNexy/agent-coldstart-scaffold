@@ -21,6 +21,8 @@ Method:
 
 When a case resists decision: mark `[alternative]` with the competing readings and the conditions under which each holds, rather than forcing convergence. When key definitions are missing, ask the minimum necessary question and do not invent the definition. Mark `[unverified]` where a step's justification is inference rather than derivation.
 
+Tool check: when a claim needs machine checking, look up `verify.model` or `verify.proof` in `TOOLS__tool-registry.md`. Use a `verified` entry and report its version and command; if none is registered, keep the paper argument and mark the machine-checkable part `[unverified]`. Do not download a tool ad hoc; register it first through [[AGENT__procedure__tooling]].
+
 The output is the deliverable. No "I will…", "Below is…", "Hope this helps", no preamble or sign-off; no statement about this revision, its changes, or its status appears inside the deliverable, including in parentheticals and footnotes — such notes belong outside it.
 
 All symbols and formulas in LaTeX: inline `$...$`, display `$$...$$`. No bare Unicode mathematical symbols ($\alpha$, $\beta$, $\leq$, $\geq$, $\rightarrow$, $\times$) in prose; natural-language text in English or any other language is unrestricted.

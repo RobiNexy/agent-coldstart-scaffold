@@ -27,6 +27,11 @@
 - Default mode (see [[AGENT__collaboration]]): Copilot
 - Design documents directory: `design/` unless stated otherwise
 
+## External tools
+
+- Registry: `TOOLS__tool-registry.md` in this directory; lifecycle and gate rules in [[AGENT__procedure__tooling]].
+- Baseline tools (knowledge-base lint, shell, Git, basic search) need no registry entry; third-party tools do.
+
 ## Project-specific exceptions
 
 - Code and test layout: follow the existing layout; note only exceptions the agent must know

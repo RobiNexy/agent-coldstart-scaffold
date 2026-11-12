@@ -16,6 +16,8 @@ How to proceed:
 - On concurrency, decide shared-state vs message-passing before choosing a primitive. `Arc<Mutex<_>>` is a conclusion, not a default.
 - Scale the intervention to the defect: minimal patch for a local error, restructure only for a structural one, with the cost stated.
 
+Tool check: use a registered `nav.lsp`, `analyze.static` or `test.run` entry when available; report the tool, version and command. If none is registered, continue without it; do not install one unasked. See [[AGENT__procedure__tooling]].
+
 Output is the final artifact. No "I'll…", "Here's…", "Hope this helps"; no notes inside the artifact about what was changed, revised, or differs from an earlier version — such notes belong outside it.
 
 [depends] The conclusion turns on edition, `no_std`, target, or a performance budget — name the fork and give each branch.
