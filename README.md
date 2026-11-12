@@ -4,12 +4,13 @@
 
 一次安装，为 Agent 提供入口、工作规则、协作方式和轻量持久记忆。按不确定性决定调查和计划，按后果决定授权，按变更范围决定验证。设计模板单独存放，需要时再取用。
 
-## v6 的核心主张
+## 核心主张
 
 - **规则管判断题，机制管是非题。** 是否需要设计记录、是否值得授权，是判断题，写在规则里；链接是否悬空、ADR 状态是否合法、看板是否引用了已解决的问题，是是非题，交给 `lint`。
 - **人类是队友，不只是审批者。** 人类时间有价格，但 `sudo`、GUI 点击、登录授权、凭据和品味判断对人是几秒、对 Agent 可能是长时间绕路。Agent 应在两次尝试后直接求助。
 - **日志先写，整理后蒸馏。** 每个任务结束机械地写一条会话日志，不做“值不值得记”的判断；判断推迟到 compaction，那时证据齐全。日志同时是观察这套工作流是否有效的仪器。
 - **列表即索引。** 任何会被工具列出的东西——文件名、提交信息、测试名、日志条目——都应在列表中自解释。文件名是稳定的 ID，文件前几行是可 grep 的元数据，正文才是权威。
+- **程序目录是必检项，不是参考表。** 每次会话先 `ls 30__PROCEDURES/`，读取与任务匹配的程序，并在日志里写一行 `Task type → procedure` triage；入口的触发表只是索引。行为或正确性任务必须读 `turn-the-problem-into-math`。
 - **常驻规则真的常驻。** `10__ALWAYS_LOAD/` 每次会话全部加载，因此必须小：CI 强制它与入口合计不超过 3000 个英文词。
 
 ## 解决什么问题
@@ -98,9 +99,9 @@ AGENTS.md                                   宿主钩子，只有一句指向入
   domain_terminology_glossary.md
   TOOLS__tool-registry.md                   外部工具登记、版本、校验和与 gate 决策
 30__PROCEDURES/                             做某类事时读取
-  AGENT__procedure__adr.md
-  AGENT__procedure__formal-problem-solving.md
-  AGENT__procedure__tooling.md              外部工具的提出、安装、验证、gate 与退役
+  AGENT__procedure__write-down-the-adr.md
+  AGENT__procedure__turn-the-problem-into-math.md
+  AGENT__procedure__you-have-tools-and-rules.md              外部工具的提出、安装、验证、gate 与退役
   AGENT__procedure__cicd-pipeline.md
   AGENT__procedure__docker-configuration.md
   AGENT__procedure__git-discipline.md
@@ -109,12 +110,15 @@ AGENTS.md                                   宿主钩子，只有一句指向入
   AGENT__procedure__rust-engineering.md
   AGENT__procedure__c-cpp-engineering.md
   AGENT__procedure__latex-authoring.md
-  AGENT__procedure__design-language.md
-  AGENT__procedure__paper-reading.md
-  AGENT__procedure__task_end.md
-  AGENT__procedure__compaction.md
-  AGENT__procedure__first_session.md
-  AGENT__procedure__production_readiness.md
+  AGENT__procedure__find-the-ui-design-language.md
+  AGENT__procedure__go-find-evidence-and-do-some-research.md
+  AGENT__procedure__long-form-writing.md
+  AGENT__procedure__coworkers-are-working-in-parallel-dont-mess-it-up.md
+  AGENT__procedure__read-the-paper.md
+  AGENT__procedure__when-ending-the-task.md
+  AGENT__procedure__tidy-the-journal.md
+  AGENT__procedure__first-day-on-the-project.md
+  AGENT__procedure__check-before-you-ship.md
 40__MEMORY/                                 写入层
   journal/                                  每任务一条会话日志
   tasks/                                    并行任务领取（TASK__）
@@ -147,9 +151,9 @@ Agent 与人的互动密度由模式控制，默认值写在目标项目的 `20_
 
 每个任务在 `40__MEMORY/journal/` 写一个文件，文件名是 `YYYY-MM-DD-HHMM__主题.md`，例如 `2026-11-10-1430__fix-login-redirect-loop.md`。`ls` 该目录就是项目时间线。
 
-任务开始时先写头部（`Mode`、`Task`），任务结束时补全 `Did`、`Verified`、`Blocked`、`Touched`、`Next`。有 `Task` 而没有 `Did` 的条目意味着上个会话中断，下一个会话应优先读它。日志与代码、ADR、现状文件冲突时，以代码和 ADR 为准。
+任务开始时先写头部（`Mode`、`Task`、`Procedures: pending`），并先列 `30__PROCEDURES/`、读取匹配程序；任务结束时把 `Procedures` 补成 `[[程序]] — 理由`，或 `none`（仅纯文档或单文件琐碎修改），再补全 `Did`、`Verified`、`Blocked`、`Touched`、`Next`。有 `Task` 而没有 `Did` 的条目意味着上个会话中断，下一个会话应优先读它。日志与代码、ADR、现状文件冲突时，以代码和 ADR 为准。
 
-`journal/` 超过 20 条或用户要求整理时，按 `AGENT__procedure__compaction.md` 执行 compaction：把持久事实蒸馏进现状、任务板、ADR 和待裁决文件，写一个 `SUMMARY__<起>_to_<止>.md`，删除原始条目（Git 保留历史），并向人类报告统计——中断次数、未验证次数、求助次数与类型、平均尝试次数。这些统计是判断这套工作流是否真的有效的依据。
+`journal/` 超过 20 条或用户要求整理时，按 `AGENT__procedure__tidy-the-journal.md` 执行 compaction：把持久事实蒸馏进现状、任务板、ADR 和待裁决文件，写一个 `SUMMARY__<起>_to_<止>.md`，删除原始条目（Git 保留历史），并向人类报告统计——中断次数、未验证次数、求助次数与类型、平均尝试次数。这些统计是判断这套工作流是否真的有效的依据。
 
 ## 研究与长文
 
@@ -159,7 +163,7 @@ Agent 与人的互动密度由模式控制，默认值写在目标项目的 `20_
 - `50__RESEARCH/<topic>/RESEARCH__<question>.md`：问题契约、检索记录、证据表、结论与置信度。开头先写“支持哪个决策、什么证据算够、何时停止”。
 - `50__RESEARCH/<topic>/REPORT__<title>.md`：面向读者的长文，引用 `RESEARCH__` 与 `SOURCE__`。
 
-研究不是每个任务的必经阶段，只在决策依赖外部证据时触发。学术调研与技术调研共用同一结构，区别在证据标准：前者看同行评审、方法与复现，后者优先官方文档、源码、可复现的 benchmark 或 spike。程序见 `30__PROCEDURES/AGENT__procedure__research.md` 与 `AGENT__procedure__long-form-writing.md`。
+研究不是每个任务的必经阶段，只在决策依赖外部证据时触发。学术调研与技术调研共用同一结构，区别在证据标准：前者看同行评审、方法与复现，后者优先官方文档、源码、可复现的 benchmark 或 spike。程序见 `30__PROCEDURES/AGENT__procedure__go-find-evidence-and-do-some-research.md` 与 `AGENT__procedure__long-form-writing.md`。
 
 ## 并行会话
 
@@ -171,7 +175,7 @@ Agent 与人的互动密度由模式控制，默认值写在目标项目的 `20_
 - 并行模式下日志文件名追加 `--<owner>`，避免同分钟碰撞。
 - 集成 session 一次合并一个分支，每合一个重跑 `lint` 与相关测试；不要最后一次性合并。
 
-完整规则见 `30__PROCEDURES/AGENT__procedure__parallel-work.md`。
+完整规则见 `30__PROCEDURES/AGENT__procedure__coworkers-are-working-in-parallel-dont-mess-it-up.md`。
 
 ## 工具层
 
@@ -195,7 +199,7 @@ Agent 与人的互动密度由模式控制，默认值写在目标项目的 `20_
 
 只有 `verified` 条目才能用于任务；只有 `verified` 且链接了 Accepted ADR 的工具才能升为 `gate`。`Data: uploads` 的条目在进入 `declared` 前必须链接 Accepted ADR，并且每次外发仍受 `AGENT__rules` 的授权约束。工具二进制不提交进仓库，放在 `.tools/`（已加入 `.gitignore`）。
 
-`TOOLS` 是新增的知识类型，登记表文件名为 `TOOLS__tool-registry.md`。完整设计、反例与边界见 [`docs/TOOLING_DESIGN.md`](docs/TOOLING_DESIGN.md)，操作程序见 `30__PROCEDURES/AGENT__procedure__tooling.md`。
+`TOOLS` 是新增的知识类型，登记表文件名为 `TOOLS__tool-registry.md`。完整设计、反例与边界见 [`docs/TOOLING_DESIGN.md`](docs/TOOLING_DESIGN.md)，操作程序见 `30__PROCEDURES/AGENT__procedure__you-have-tools-and-rules.md`。
 
 ## 宿主集成
 
@@ -258,7 +262,7 @@ Copy-Item (Join-Path $sourceDir 'templates/feature/_TEMPLATE__FEATURE.md') `
 
 安装器不会覆盖或删除已有文件，所以升级不只是“重跑安装器”。完整流程写在 [`UPGRADING.md`](UPGRADING.md)，由 Agent 在目标项目中逐项执行：识别已安装版本 → 列出新增与已改动文件 → 安装器补齐新文件 → 合并本地修改 → 清理旧路径 → 运行 `--verify`、`lint` 与词数检查。
 
-版本识别的依据是目标 `00__AGENT__START_HERE.md` 第一行的标记（例如 `<!-- agent-coldstart-scaffold entry v6.2.0 -->`）与源码根目录的 `VERSION`。两者不一致时，Agent 按 `UPGRADING.md` 的版本说明逐段升级。
+版本识别的依据是目标 `00__AGENT__START_HERE.md` 第一行的标记（例如 `<!-- agent-coldstart-scaffold entry v7.0.0 -->`）与源码根目录的 `VERSION`。两者不一致时，Agent 按 `UPGRADING.md` 的版本说明逐段升级。
 
 从 v5 或 v4.1 升级时，人工要点：
 
@@ -287,7 +291,7 @@ Copy-Item (Join-Path $sourceDir 'templates/feature/_TEMPLATE__FEATURE.md') `
 
 ## 语言策略
 
-Agent 读取的文件（`scaffold/`、`templates/`、启动指引、安装器输出）使用英文，以便与多数宿主的系统提示和指令遵循语言一致。README、CHANGELOG 和 `docs/` 使用中文。项目自身内容（项目目的、约定、术语、日志）跟随项目实际语言。用户自有、按中文调优的提示词程序（如 `AGENT__procedure__paper-reading.md`）保留中文原文。
+Agent 读取的文件（`scaffold/`、`templates/`、启动指引、安装器输出）使用英文，以便与多数宿主的系统提示和指令遵循语言一致。README、CHANGELOG 和 `docs/` 使用中文。项目自身内容（项目目的、约定、术语、日志）跟随项目实际语言。用户自有、按中文调优的提示词程序（如 `AGENT__procedure__read-the-paper.md`）保留中文原文。
 
 ## 设计文档
 

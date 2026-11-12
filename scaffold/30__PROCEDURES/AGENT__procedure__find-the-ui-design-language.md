@@ -1,4 +1,4 @@
-# AGENT__procedure__design-language
+# AGENT__procedure__find-the-ui-design-language
 
 ## Ability Activation — Design Language Extraction and Implementation
 

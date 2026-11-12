@@ -1,4 +1,4 @@
-# AGENT__procedure__compaction
+# AGENT__procedure__tidy-the-journal
 
 Compaction turns the journal (what happened) into memory (what is true now) and removes the raw entries. It is also where the project learns about itself.
 
@@ -17,7 +17,7 @@ Compaction is itself a task: open and close a journal entry for it.
 3. Route lasting facts out of the journal:
    - Current state, known limitations, important deviations → `project_state_now.md`
    - Unfinished work → `task_board.md` (remove anything done)
-   - Decisions → ADRs via [[AGENT__procedure__adr]]
+   - Decisions → ADRs via [[AGENT__procedure__write-down-the-adr]]
    - Undecided questions → `open_questions_for_human.md`; questions resolved by evidence → remove, write the resolution where it belongs
 4. Write one summary file `40__MEMORY/journal/SUMMARY__<first-date>_to_<last-date>.md` (format below).
 5. Delete the raw entries you summarized. Git keeps them.

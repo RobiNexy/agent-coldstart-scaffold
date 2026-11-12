@@ -1,4 +1,4 @@
-# AGENT__procedure__adr
+# AGENT__procedure__write-down-the-adr
 
 Read this before creating, accepting, rejecting or superseding an architecture decision record. Template: `templates/decisions/_TEMPLATE__ADR.md` in the scaffold source repository.
 

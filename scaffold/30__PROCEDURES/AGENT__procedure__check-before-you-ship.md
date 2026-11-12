@@ -1,6 +1,6 @@
-# AGENT__procedure__production_readiness
+# AGENT__procedure__check-before-you-ship
 
-Read this when touching deployment, infrastructure, data migrations, or anything on the path to production, and during [[AGENT__procedure__first_session]] for projects meant to ship. This is a checklist for *noticing gaps*, not a form to fill. Report gaps; fix only what the task asks for or the human approves.
+Read this when touching deployment, infrastructure, data migrations, or anything on the path to production, and during [[AGENT__procedure__first-day-on-the-project]] for projects meant to ship. This is a checklist for *noticing gaps*, not a form to fill. Report gaps; fix only what the task asks for or the human approves.
 
 ## Before any change on the path to production
 
@@ -11,7 +11,7 @@ Read this when touching deployment, infrastructure, data migrations, or anything
 
 If any answer is "unknown", stop and ask before acting.
 
-Before closing a readiness review, check `secure.deps` and `secure.secrets` in `20__PROJECT_CONTEXT/TOOLS__tool-registry.md`. If either is absent, record the gap in `open_questions_for_human.md`; do not install a scanner unasked. The registry lifecycle is in [[AGENT__procedure__tooling]].
+Before closing a readiness review, check `secure.deps` and `secure.secrets` in `20__PROJECT_CONTEXT/TOOLS__tool-registry.md`. If either is absent, record the gap in `open_questions_for_human.md`; do not install a scanner unasked. The registry lifecycle is in [[AGENT__procedure__you-have-tools-and-rules]].
 
 ## Gaps worth flagging (write to `open_questions_for_human.md` as `Q-prod-<topic>`)
 

@@ -1,4 +1,4 @@
-# AGENT__procedure__tooling
+# AGENT__procedure__you-have-tools-and-rules
 
 ## Capability Activation: External Tools
 

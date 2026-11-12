@@ -17,7 +17,7 @@ Examples: editing a pure function covered by tests → do it. Adding a database 
 
 ## Decision priority
 
-Safety, legal and platform boundaries first. Then the user's explicit instructions this session. Then project conventions and accepted ADRs. If a task description merely seems to conflict with an accepted decision, point out the conflict and ask; do not infer that the decision is void. If the user explicitly asks to change a decision, follow [[AGENT__procedure__adr]].
+Safety, legal and platform boundaries first. Then the user's explicit instructions this session. Then project conventions and accepted ADRs. If a task description merely seems to conflict with an accepted decision, point out the conflict and ask; do not infer that the decision is void. If the user explicitly asks to change a decision, follow [[AGENT__procedure__write-down-the-adr]].
 
 ## Environment and safety
 
@@ -37,7 +37,7 @@ Safety, legal and platform boundaries first. Then the user's explicit instructio
 - Add or change a design record only when a long-lived behavior, contract, data meaning, architectural decision, project boundary, or quality attribute (security, privacy, performance, reliability, operations) changes. Fixing an implementation bug while the design stays correct needs no spec change.
 - Specs describe behavior and acceptance conditions. Contracts, data models, ADRs, diagrams and runbooks are optional; templates are starting points, not forms.
 - Files follow `TYPE__conclusion-or-topic.md`; the title equals the stem; links are `[[filename]]` and must resolve uniquely. Renaming requires updating every reference (`rg -nF '[[old-name'`).
-- ADR lifecycle, acceptance and supersession: [[AGENT__procedure__adr]].
+- ADR lifecycle, acceptance and supersession: [[AGENT__procedure__write-down-the-adr]].
 
 ## Verification
 
@@ -48,7 +48,7 @@ Safety, legal and platform boundaries first. Then the user's explicit instructio
 
 ## Memory
 
-- Every task that changes something ends with a journal entry: [[AGENT__procedure__task_end]]. The entry is mechanical; do not decide whether it is "worth" writing.
+- Every task that changes something ends with a journal entry: [[AGENT__procedure__when-ending-the-task]]. The entry is mechanical; do not decide whether it is "worth" writing.
 - `40__MEMORY/task_board.md` lists only unfinished work; remove items when done. `open_questions_for_human.md` lists only undecided questions that block work or affect safety, compatibility or lasting decisions; write a blocking question immediately, not at task end.
 - `project_state_now.md` is normally updated during compaction, not during ordinary tasks, except when leaving it stale would mislead the very next session.
 - Question IDs are `Q-<topic>`, unique within the project, never renumbered. Resolve by writing the lasting decision to its authoritative document, removing task-board references, then removing the question.

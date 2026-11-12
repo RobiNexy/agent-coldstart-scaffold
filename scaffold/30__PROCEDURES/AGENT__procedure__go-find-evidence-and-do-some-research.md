@@ -1,4 +1,4 @@
-# AGENT__procedure__research
+# AGENT__procedure__go-find-evidence-and-do-some-research
 
 Research is decision support. The output is not a bibliography; it is a defensible answer to a question that changes a decision. Keep the evidence trail under `50__RESEARCH/` so the next session can audit it without repeating the search.
 

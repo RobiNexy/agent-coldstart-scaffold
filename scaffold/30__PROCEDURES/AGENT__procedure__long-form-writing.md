@@ -85,7 +85,7 @@ Include versions, environments, commands, and results. Prefer a runnable example
 - Put the deliverable in a `REPORT__<title>.md` file, or in the project's chosen documentation location using the same title convention.
 - Link the report from the `RESEARCH__` file and from the task journal entry.
 - If the report changes a durable decision, write or update the ADR and link it.
-- Close the task with a journal entry following [[AGENT__procedure__task_end]].
+- Close the task with a journal entry following [[AGENT__procedure__when-ending-the-task]].
 
 ## Hard rules
 

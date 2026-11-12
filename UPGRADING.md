@@ -17,7 +17,7 @@ The installer only adds missing files and never overwrites. An upgrade therefore
 The first line of the target `00__AGENT__START_HERE.md` carries the version marker:
 
 ```text
-<!-- agent-coldstart-scaffold entry v6.4.0 -->
+<!-- agent-coldstart-scaffold entry v7.0.0 -->
 ```
 
 The version in that marker is the installed version.
@@ -128,6 +128,41 @@ Apply every section between the installed and target versions.
 - The entry marker changes to `v6.4.0`.
 - No installed asset was removed and no directory was renamed.
 
+### 6.4.0 → 6.5.0
+
+- The entry gains a mandatory `Begin` step: list `30__PROCEDURES/` and read every procedure whose filename matches the task. Merge it into the existing entry; the trigger table becomes an index, not a substitute for the directory listing.
+- `10__ALWAYS_LOAD/AGENT__rules.md` gains the matching rule. Merge it into the existing file.
+- `30__PROCEDURES/AGENT__procedure__task_end.md` adds the `Procedures` journal field to the start/close templates and the field table. Merge it.
+- The entry marker changes to `v6.5.0`.
+- No installed asset was removed and no directory was renamed.
+
+### 6.5.0 → 7.0.0
+
+This release renames procedure files. It is a breaking change for `[[links]]` and for scripts that reference procedure paths.
+
+- Rename the installed procedures and update every reference:
+
+  | Old | New |
+  |---|---|
+  | `AGENT__procedure__adr.md` | `AGENT__procedure__write-down-the-adr.md` |
+  | `AGENT__procedure__compaction.md` | `AGENT__procedure__tidy-the-journal.md` |
+  | `AGENT__procedure__design-language.md` | `AGENT__procedure__find-the-ui-design-language.md` |
+  | `AGENT__procedure__first_session.md` | `AGENT__procedure__first-day-on-the-project.md` |
+  | `AGENT__procedure__formal-problem-solving.md` | `AGENT__procedure__turn-the-problem-into-math.md` |
+  | `AGENT__procedure__paper-reading.md` | `AGENT__procedure__read-the-paper.md` |
+  | `AGENT__procedure__parallel-work.md` | `AGENT__procedure__coworkers-are-working-in-parallel-dont-mess-it-up.md` |
+  | `AGENT__procedure__production_readiness.md` | `AGENT__procedure__check-before-you-ship.md` |
+  | `AGENT__procedure__research.md` | `AGENT__procedure__go-find-evidence-and-do-some-research.md` |
+  | `AGENT__procedure__task_end.md` | `AGENT__procedure__when-ending-the-task.md` |
+  | `AGENT__procedure__tooling.md` | `AGENT__procedure__you-have-tools-and-rules.md` |
+
+- Merge the new entry: step 3 lists `30__PROCEDURES/`, step 4 writes a `Task type → procedure` triage. Behavior/correctness work must read `turn-the-problem-into-math`; commit/branch work must read `git-discipline`.
+- Merge the matching `AGENT__rules.md` bullet.
+- Merge the `when-ending-the-task` journal field: `Procedures: [[link]] — one-line reason`, or `none` only for pure documentation or a single trivial local edit.
+- Delete the old procedure files only after all links and path references are migrated. `legacy-paths.txt` lists them; the installer will warn until they are removed.
+- The entry marker changes to `v7.0.0`.
+- Renamed files are not automatically deleted by the installer.
+
 ### Pre-v6 (v4.x, v5.x) → 6.x
 
 Use the README section "升级" as a checklist:
@@ -160,7 +195,7 @@ A check that cannot run is reported as such, never as passed.
 
 ## 6. Close
 
-- Write one journal entry for this task, following [[AGENT__procedure__task_end]]. Name the files added, merged and removed.
+- Write one journal entry for this task, following [[AGENT__procedure__when-ending-the-task]]. Name the files added, merged and removed.
 - Report to the user: target path, installed → target version, files added/merged/removed, verification output, and anything still awaiting a decision.
 - Do not commit unless the user asked or the project conventions say to.
 

@@ -389,7 +389,7 @@ if (Test-Path -LiteralPath $journalPath -PathType Container) {
         }
     }
     if ($rawCount -gt 20) {
-        Write-Finding 'WARN' 'L9-journal-count' '40__MEMORY/journal' "$rawCount raw entries; consider compaction (see AGENT__procedure__compaction.md)"
+        Write-Finding 'WARN' 'L9-journal-count' '40__MEMORY/journal' "$rawCount raw entries; consider compaction (see AGENT__procedure__tidy-the-journal.md)"
     }
 }
 

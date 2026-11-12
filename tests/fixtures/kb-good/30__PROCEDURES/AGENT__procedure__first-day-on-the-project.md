@@ -1,4 +1,4 @@
-# AGENT__procedure__first_session
+# AGENT__procedure__first-day-on-the-project
 
 Run this when `20__PROJECT_CONTEXT/project_conventions.md` still says "unknown" for the test command, or when the user asks to set up the workflow. Keep it short: three questions at most, no interviews.
 
@@ -9,7 +9,7 @@ Run this when `20__PROJECT_CONTEXT/project_conventions.md` still says "unknown" 
    - Default collaboration mode? (default: Copilot)
    - May I commit on my own? (default: no)
 4. Write confirmed answers into `project_conventions.md` and, if confirmed, `project_purpose_and_boundary.md`.
-5. If the project is meant to go to production, run through [[AGENT__procedure__production_readiness]] and record gaps in `open_questions_for_human.md` — do not fix them unasked.
+5. If the project is meant to go to production, run through [[AGENT__procedure__check-before-you-ship]] and record gaps in `open_questions_for_human.md` — do not fix them unasked.
 6. Close with a journal entry.
 
 Do not create directories, move code, or install tools during this procedure.

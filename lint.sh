@@ -414,7 +414,7 @@ if [ -d "$TARGET/$journal" ]; then
 $(find "$TARGET/$journal" -maxdepth 1 -name '*.md' -type f -print)
 EOF
   if [ "$raw_count" -gt 20 ]; then
-    warn "L9-journal-count" "$journal" "${raw_count} raw entries; consider compaction (see AGENT__procedure__compaction.md)"
+    warn "L9-journal-count" "$journal" "${raw_count} raw entries; consider compaction (see AGENT__procedure__tidy-the-journal.md)"
   fi
 fi
 

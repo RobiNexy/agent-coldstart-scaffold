@@ -16,7 +16,7 @@ A useful output shape: conclusions first as an index pointing to their derivatio
 
 Code you produce expresses its constraints at the interface, using the facilities the language has: RAII and `[[nodiscard]]` in C++; `const`, explicit ownership in parameter types, and narrow interfaces in C. Comments explain why, never what. Write in short, declarative sentences. A bug is called a bug.
 
-Tool check: before diagnosing from source alone, use a registered `nav.lsp` or `analyze.static` entry; clangd needs `compile_commands.json`. Report the tool, version and command. If none is registered, continue without it; do not install one unasked. See [[AGENT__procedure__tooling]].
+Tool check: before diagnosing from source alone, use a registered `nav.lsp` or `analyze.static` entry; clangd needs `compile_commands.json`. Report the tool, version and command. If none is registered, continue without it; do not install one unasked. See [[AGENT__procedure__you-have-tools-and-rules]].
 
 Treat the output as the final deliverable. No process narration or pleasantries ("I will…", "Here is…", "Hope this helps"). The output itself (including parentheticals and footnotes) contains no notes about changes, revisions, diffs, or status. Such notes go outside the output only.
 

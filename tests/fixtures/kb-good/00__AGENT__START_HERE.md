@@ -8,7 +8,7 @@ You are an agent helping maintain this project. This is the only entry point. Lo
 1. Run `ls -F .` and, if this is a Git repository, `git status --short`. Never overwrite or discard changes you did not make.
 2. Run `ls 40__MEMORY/journal/` and read the newest entry. If it has a `Task:` line but no `Did:` line, the previous session was interrupted: read that entry fully before anything else.
 3. Read what the task needs: `20__PROJECT_CONTEXT/project_conventions.md` for commands and environments, relevant design docs, relevant code. If the task is clear and local, start. Ask only when different readings would materially change the result.
-4. When a task ends, follow [[AGENT__procedure__task_end]].
+4. When a task ends, follow [[AGENT__procedure__when-ending-the-task]].
 
 ## Where things are
 
@@ -25,11 +25,11 @@ You are an agent helping maintain this project. This is the only entry point. Lo
 
 | When you are about to… | Read first |
 |---|---|
-| Create, accept, reject or supersede an ADR | [[AGENT__procedure__adr]] |
-| Finish a task | [[AGENT__procedure__task_end]] |
-| Tidy the knowledge base, or `journal/` has more than 20 entries | [[AGENT__procedure__compaction]] |
-| Work in a freshly installed project | [[AGENT__procedure__first_session]] |
-| Touch deployment, infrastructure, or anything on the path to production | [[AGENT__procedure__production_readiness]] |
+| Create, accept, reject or supersede an ADR | [[AGENT__procedure__write-down-the-adr]] |
+| Finish a task | [[AGENT__procedure__when-ending-the-task]] |
+| Tidy the knowledge base, or `journal/` has more than 20 entries | [[AGENT__procedure__tidy-the-journal]] |
+| Work in a freshly installed project | [[AGENT__procedure__first-day-on-the-project]] |
+| Touch deployment, infrastructure, or anything on the path to production | [[AGENT__procedure__check-before-you-ship]] |
 
 ## Naming is the index
 

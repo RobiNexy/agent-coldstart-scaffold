@@ -3,7 +3,7 @@
 - Status: active
 - As of: YYYY-MM-DD
 
-One `## <tool-id>` section per tool. Delete this note and every field that does not apply. Keep the lifecycle and gate rules from `AGENT__procedure__tooling`.
+One `## <tool-id>` section per tool. Delete this note and every field that does not apply. Keep the lifecycle and gate rules from `AGENT__procedure__you-have-tools-and-rules`.
 
 ## example-tool
 

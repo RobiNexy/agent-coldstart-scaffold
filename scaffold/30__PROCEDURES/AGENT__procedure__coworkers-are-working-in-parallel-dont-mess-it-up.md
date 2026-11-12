@@ -1,4 +1,4 @@
-# AGENT__procedure__parallel-work
+# AGENT__procedure__coworkers-are-working-in-parallel-dont-mess-it-up
 
 Parallel work is a write-set problem, not a throughput problem. Two sessions are safe only when they do not write the same file and do not depend on each other's uncommitted changes. Git is the coordination mechanism; no locks or daemons are needed.
 

@@ -1,6 +1,6 @@
 # ADR__conclusion
 
-Rename file and title to a concise conclusion (what the project does). A changed conclusion is a new ADR; accepted records are not rewritten. Procedure: [[AGENT__procedure__adr]].
+Rename file and title to a concise conclusion (what the project does). A changed conclusion is a new ADR; accepted records are not rewritten. Procedure: [[AGENT__procedure__write-down-the-adr]].
 
 ## Metadata
 

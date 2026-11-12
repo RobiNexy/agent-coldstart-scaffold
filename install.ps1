@@ -212,8 +212,8 @@ if (Test-Path -LiteralPath $legacyListPath -PathType Leaf) {
 $entryPath = Join-Path -Path $targetPath -ChildPath '00__AGENT__START_HERE.md'
 if (Test-Path -LiteralPath $entryPath -PathType Leaf) {
     $entryContent = Get-Content -LiteralPath $entryPath -Raw
-    if (-not $entryContent.Contains('agent-coldstart-scaffold entry v6')) {
-        [Console]::Error.WriteLine('  LEGACY  00__AGENT__START_HERE.md (older entry file; it does not reference the v6 layout. Replace it manually with scaffold/00__AGENT__START_HERE.md)')
+    if (-not $entryContent.Contains('agent-coldstart-scaffold entry v')) {
+        [Console]::Error.WriteLine('  LEGACY  00__AGENT__START_HERE.md (older entry file; it does not reference the current v6+ layout. Replace it manually with scaffold/00__AGENT__START_HERE.md)')
         $legacyCount++
     }
 }

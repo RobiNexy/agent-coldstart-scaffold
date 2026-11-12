@@ -2,6 +2,45 @@
 
 重要变更记录。每次发布前更新对应版本条目。
 
+## 7.0.0 — 2026-11-12
+
+与 6.x 的程序文件名不兼容。安装器只补新文件，旧文件保留；升级时按 `UPGRADING.md` 的旧→新表迁移链接后删除旧文件。
+
+### Changed
+
+- 11 个程序改为口语化名字：
+  - `AGENT__procedure__adr` → `AGENT__procedure__write-down-the-adr`
+  - `AGENT__procedure__compaction` → `AGENT__procedure__tidy-the-journal`
+  - `AGENT__procedure__design-language` → `AGENT__procedure__find-the-ui-design-language`
+  - `AGENT__procedure__first_session` → `AGENT__procedure__first-day-on-the-project`
+  - `AGENT__procedure__formal-problem-solving` → `AGENT__procedure__turn-the-problem-into-math`
+  - `AGENT__procedure__paper-reading` → `AGENT__procedure__read-the-paper`
+  - `AGENT__procedure__parallel-work` → `AGENT__procedure__coworkers-are-working-in-parallel-dont-mess-it-up`
+  - `AGENT__procedure__production_readiness` → `AGENT__procedure__check-before-you-ship`
+  - `AGENT__procedure__research` → `AGENT__procedure__go-find-evidence-and-do-some-research`
+  - `AGENT__procedure__task_end` → `AGENT__procedure__when-ending-the-task`
+  - `AGENT__procedure__tooling` → `AGENT__procedure__you-have-tools-and-rules`
+- 入口新增第 4 步 procedure triage：先写 `Task type → procedure`；行为/正确性任务必须读 `turn-the-problem-into-math`，commit/branch 任务必须读 `git-discipline`。
+- 日志 `Procedures` 字段改为 `[[link]] — one-line reason`；`none` 仅允许纯文档或单文件琐碎修改。
+- `AGENT__rules`、`AGENT__procedure__when-ending-the-task`、README、入口触发表、模板、fixtures 与 docs 同步新名字和 triage 规则。
+- `lint.sh` / `lint.ps1` 的 compaction 提示改为新文件名。
+- `install.sh` / `install.ps1` 的入口标记检查从固定 `v6` 放宽到任意版本标记，避免 v7 被误报为旧入口。
+- `legacy-paths.txt` 加入 11 个旧程序路径，升级时安装器会输出 LEGACY 警告。
+
+## 6.5.0 — 2026-11-12
+
+### Added
+
+- 会话日志新增 `Procedures` 字段：记录本任务实际读取的 `30__PROCEDURES/` 程序；没有匹配程序时写 `none`，不得省略。
+
+### Changed
+
+- 入口 `Begin` 新增必做步骤：先 `ls 30__PROCEDURES/` 并读取与任务匹配的程序；触发表降为索引，不能替代目录列表。
+- `AGENT__rules` 新增同一条硬规则：改动前必须浏览程序目录，并把结果写进日志。
+- `AGENT__procedure__task_end` 的开始/结束模板与字段说明同步新增 `Procedures`。
+- README 的 v6 核心主张与会话日志说明补充“程序目录是必检项”。
+- `UPGRADING.md` 新增 6.4.0 → 6.5.0 合并说明。
+
 ## 6.4.0 — 2026-11-12
 
 ### Added

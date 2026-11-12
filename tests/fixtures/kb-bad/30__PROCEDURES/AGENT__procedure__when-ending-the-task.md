@@ -1,6 +1,6 @@
-# AGENT__procedure__task_end
+# AGENT__procedure__when-ending-the-task
 
-The journal is the write-first memory layer. Entries are mechanical: fixed fields, no judgment about whether the task "deserves" one. Judgment happens later in [[AGENT__procedure__compaction]].
+The journal is the write-first memory layer. Entries are mechanical: fixed fields, no judgment about whether the task "deserves" one. Judgment happens later in [[AGENT__procedure__tidy-the-journal]].
 
 ## Where and what name
 

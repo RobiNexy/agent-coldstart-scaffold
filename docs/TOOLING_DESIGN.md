@@ -2,9 +2,9 @@
 
 - Status: final
 - As of: 2026-11-12
-- Scope: framework 6.4.0；不改变已安装项目的既有行为，除非项目主动登记工具
+- Scope: framework 7.0.0；不改变已安装项目的既有行为，除非项目主动登记工具
 
-本文按 `AGENT__procedure__formal-problem-solving` 的六步组织：框架选择 → 形式陈述 → 交叉论证 → 反例与边界优先 → 落地 → 独立校验。
+本文按 `AGENT__procedure__turn-the-problem-into-math` 的六步组织：框架选择 → 形式陈述 → 交叉论证 → 反例与边界优先 → 落地 → 独立校验。
 
 ## 0. 结论
 
@@ -202,7 +202,7 @@ C1 来自一次真实的锁协议审计：TLA+ 本身有价值，但“LLM 自�
 | 基线能力 | `lint.sh` / `lint.ps1`、`bash` / `pwsh`、`git`、`ls`/`find`/`grep`、可选 `rg`；不进入登记表 |
 | `scaffold/00__AGENT__START_HERE.md` | 允许类型表加入 `TOOLS`；位置表加入登记表；触发项加入 tooling 程序 |
 | `scaffold/20__PROJECT_CONTEXT/TOOLS__tool-registry.md` | 默认空登记表；安装后即可通过 lint |
-| `scaffold/30__PROCEDURES/AGENT__procedure__tooling.md` | 工具治理程序：类别、生命周期、安装、验证、gate、退役 |
+| `scaffold/30__PROCEDURES/AGENT__procedure__you-have-tools-and-rules.md` | 工具治理程序：类别、生命周期、安装、验证、gate、退役 |
 | `templates/tooling/_TEMPLATE__TOOLS.md` | 可选模板；包含一个完整示例条目 |
 | `lint.sh` / `lint.ps1` | L14 登记表字段；L15 gate / uploads 的 ADR 门槛 |
 | `scaffold/.gitignore` | 忽略 `.tools/`；仓库只存清单和引导脚本 |
@@ -315,13 +315,13 @@ gate 条目额外要求：
 
 | 文件 | 触发 |
 |---|---|
-| `AGENT__procedure__first_session.md` | 识别语言与构建系统后，提出候选工具，写 `candidate`，不安装 |
-| `AGENT__procedure__formal-problem-solving.md` | 结论需要机器检查时，查 `verify.model` / `verify.proof`；未登记则只做纸面论证并标 `[unverified]` |
+| `AGENT__procedure__first-day-on-the-project.md` | 识别语言与构建系统后，提出候选工具，写 `candidate`，不安装 |
+| `AGENT__procedure__turn-the-problem-into-math.md` | 结论需要机器检查时，查 `verify.model` / `verify.proof`；未登记则只做纸面论证并标 `[unverified]` |
 | `AGENT__procedure__c-cpp-engineering.md` | 编辑 C/C++ 前检查 `nav.lsp` 与 `analyze.static`；clangd 需要 `compile_commands.json` |
 | `AGENT__procedure__rust-engineering.md` | 检查 `nav.lsp`、`analyze.static`、`test.run` |
 | `AGENT__procedure__go-engineering.md` | 检查 `nav.lsp`、`analyze.static`、`test.run` |
 | `AGENT__procedure__cicd-pipeline.md` | 只把 `Mode: gate` 且 `Scope` 含 `ci` 的条目接入流水线 |
-| `AGENT__procedure__production_readiness.md` | 检查 `secure.deps`、`secure.secrets` 是否已登记 |
+| `AGENT__procedure__check-before-you-ship.md` | 检查 `secure.deps`、`secure.secrets` 是否已登记 |
 
 项目信号到候选工具（示例，不是默认安装清单；候选仍走完整生命周期）：
 
@@ -395,7 +395,7 @@ L14/L15 是框架对“工具怎么管理”的机械回答。它们不能证明
 
 - [x] `TOOLS` 出现在入口允许类型表、README、模板和 lint 允许列表。
 - [x] 默认安装包含空登记表，安装后 lint 0 errors。
-- [x] `AGENT__procedure__tooling.md` 覆盖提出、声明、安装、验证、gate、退役。
+- [x] `AGENT__procedure__you-have-tools-and-rules.md` 覆盖提出、声明、安装、验证、gate、退役。
 - [x] L14 覆盖字段、枚举、版本、校验和、smoke、日期、重复条目。
 - [x] L15 覆盖 gate 状态、gate ADR、uploads ADR、retired gate。
 - [x] good/bad 夹具与两种 lint 实现一致。

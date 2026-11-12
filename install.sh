@@ -150,8 +150,8 @@ check_legacy() {
   fi
 
   if [ -f "${TARGET}/00__AGENT__START_HERE.md" ] \
-    && ! grep -qF 'agent-coldstart-scaffold entry v6' "${TARGET}/00__AGENT__START_HERE.md"; then
-    echo "  LEGACY  00__AGENT__START_HERE.md (older entry file; it does not reference the v6 layout. Replace it manually with scaffold/00__AGENT__START_HERE.md)" >&2
+    && ! grep -qF 'agent-coldstart-scaffold entry v' "${TARGET}/00__AGENT__START_HERE.md"; then
+    echo "  LEGACY  00__AGENT__START_HERE.md (older entry file; it does not reference the current v6+ layout. Replace it manually with scaffold/00__AGENT__START_HERE.md)" >&2
     legacy_count=$((legacy_count + 1))
   fi
 }

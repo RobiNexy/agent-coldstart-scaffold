@@ -1,6 +1,6 @@
 # Project state now
 
-> What is true now that is not obvious from code or Git and that the next session needs. Normally updated during compaction ([[AGENT__procedure__compaction]]). Delete empty sections; the file may be empty.
+> What is true now that is not obvious from code or Git and that the next session needs. Normally updated during compaction ([[AGENT__procedure__tidy-the-journal]]). Delete empty sections; the file may be empty.
 
 ## Current state
 

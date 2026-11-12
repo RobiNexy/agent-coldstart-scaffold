@@ -5,3 +5,14 @@
 40__CODING_IS_CHEAP/
 50__HUMAN_SOURCE_DO_NOT_EDIT/
 50__STRUCTURAL_DESIGNS/
+30__PROCEDURES/AGENT__procedure__adr.md
+30__PROCEDURES/AGENT__procedure__compaction.md
+30__PROCEDURES/AGENT__procedure__design-language.md
+30__PROCEDURES/AGENT__procedure__first_session.md
+30__PROCEDURES/AGENT__procedure__formal-problem-solving.md
+30__PROCEDURES/AGENT__procedure__paper-reading.md
+30__PROCEDURES/AGENT__procedure__parallel-work.md
+30__PROCEDURES/AGENT__procedure__production_readiness.md
+30__PROCEDURES/AGENT__procedure__research.md
+30__PROCEDURES/AGENT__procedure__task_end.md
+30__PROCEDURES/AGENT__procedure__tooling.md

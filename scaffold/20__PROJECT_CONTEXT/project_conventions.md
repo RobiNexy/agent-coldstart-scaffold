@@ -29,7 +29,7 @@
 
 ## External tools
 
-- Registry: `TOOLS__tool-registry.md` in this directory; lifecycle and gate rules in [[AGENT__procedure__tooling]].
+- Registry: `TOOLS__tool-registry.md` in this directory; lifecycle and gate rules in [[AGENT__procedure__you-have-tools-and-rules]].
 - Baseline tools (knowledge-base lint, shell, Git, basic search) need no registry entry; third-party tools do.
 
 ## Project-specific exceptions

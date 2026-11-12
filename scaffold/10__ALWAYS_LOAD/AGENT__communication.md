@@ -17,7 +17,7 @@ Reply in the language the user writes in. Code identifiers, comments, commit mes
 
 ## End-of-task report
 
-Use the same content as the journal entry ([[AGENT__procedure__task_end]]), in three short parts, omitting any part that is empty:
+Use the same content as the journal entry ([[AGENT__procedure__when-ending-the-task]]), in three short parts, omitting any part that is empty:
 
 1. **Did** — what changed, in terms of behavior, not files.
 2. **Verified** — commands run and results; or "not verified" with the reason.

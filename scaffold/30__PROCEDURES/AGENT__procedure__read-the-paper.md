@@ -1,4 +1,4 @@
-# AGENT__procedure__paper-reading
+# AGENT__procedure__read-the-paper
 
 ## 能力激活指令
 
