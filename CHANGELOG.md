@@ -2,6 +2,75 @@
 
 重要变更记录。每次发布前更新对应版本条目。
 
+## 7.5.0 — 2026-11-12
+
+### Added
+
+- 新增 `AGENT__procedure__write-tests-that-can-fail.md`：按后果排序测试点，要求回归测试在修改前失败、断言完整可观察契约、使用真实 payload/fixture，并输出 test-strength audit。
+- 入口触发表新增“Write or review tests, or verify a behavior change”。
+
+### Changed
+
+- `AGENT__rules` 的强制默认加入 `write-tests-that-can-fail`：已有代码库 + 行为修改、bug/回归都必须读。
+- `Verified` 字段要求行为变更或 bug 修复引用“修改前失败、修改后通过”的测试，否则写 `not verified: <reason>`。
+- `pin-the-behavior-before-you-change-it` 与 `fix-the-cause-not-the-symptom` 交叉链接新测试程序。
+- `when-ending-the-task` 补测试强度和 `Verified` 说明。
+- 这次改动的依据：v8 已经读对 procedure，但自写测试只用存在性断言和简化 payload，测试通过而真实契约仍失败。
+
+## 7.4.0 — 2026-11-12
+
+### Added
+
+- 入口新增第 4 步“显式程序计划”：在调查或编辑前，从任务形态和仓库语境列出每条候选程序的 `read` / `defer` / `skip` 与理由，并显式回答已有代码库、行为变更、共享组件、测试薄弱、fork/upstream、公开契约、生产路径、bug/回归、commit/branch 这组是非题；所有 `read` 必须在第一次编辑前读完，计划随证据更新。
+- journal 模板新增 `## Procedure plan` 表；`Procedures` 字段记录计划的最终状态，`skip` 必须给理由。
+
+### Changed
+
+- `AGENT__rules` 增加强制默认：已有代码库 + 行为修改 → `map` + `pin` + `smallest`；bug/回归 → `fix` + `turn`；共享组件 → `know`；fork/upstream → `fork`；公开契约/迁移 → `change`；生产路径 → `check-before`；commit/branch → `git`。
+- 入口步骤重新编号；程序计划与 triage 必须一致。
+- `when-ending-the-task` 的日志模板和字段说明同步。
+- `fix-the-cause-not-the-symptom` 的 matrix 必须从 `know-what-else-uses-it` 的接口/注册表清单开始，不能从怀疑的表面开始；`know-what-else-uses-it` 也从实现枚举入口起手。
+- 这次改动的依据：v7 只读了主程序，受影响面矩阵只覆盖了模型已经相信的表面，没有覆盖同仓库的其他格式或调用方。
+
+## 7.3.0 — 2026-11-12
+
+### Added
+
+- 新增 6 个旧项目维护程序，放入 `30__PROCEDURES/20__TAKING_OVER_A_LEGACY_PROJECT/`：
+  - `map-the-existing-system-first`：入口、数据流、外部契约、构建/测试/部署、历史与 fork 基线。
+  - `pin-the-behavior-before-you-change-it`：golden master、record/replay、契约测试与新旧差分。
+  - `know-what-else-uses-it`：调用方、兼容承诺、覆盖状态与跨 surface 矩阵。
+  - `make-the-smallest-diff-that-works`：范围控制、保留无关行为、记录 follow-up。
+  - `keep-the-fork-in-sync`：上游基线、补丁清单、选择性 port 与本地契约验证。
+  - `change-it-without-breaking-callers`：兼容契约、迁移、弃用与回滚。
+- `30__PROCEDURES/` 按语境分目录：`00__GENERAL/`、`10__STARTING_A_NEW_PROJECT/`、`20__TAKING_OVER_A_LEGACY_PROJECT/`。
+
+### Changed
+
+- 入口、`AGENT__rules` 与 journal 程序改为 `ls -R 30__PROCEDURES/`；接手旧项目必须读 `map-the-existing-system-first`，改共享契约必须读 `know-what-else-uses-it`。
+- `first-day-on-the-project` 遇到已有代码或提交时，先转 `map-the-existing-system-first`。
+- `check-before-you-ship` 遇到公开 API、schema、配置、wire format 或存储数据变更时，转 `change-it-without-breaking-callers`。
+- `fix-the-cause-not-the-symptom` 的 failure-surface matrix 只要求从 surface 自身契约推导输入形态，不写死具体用例，避免把单个任务的细节固化成框架规则。
+
+## 7.2.0 — 2026-11-12
+
+### Added
+
+- 新增 `AGENT__procedure__fix-the-cause-not-the-symptom.md`：把调试当作因果追踪与失败面分析，而不是局部打补丁。要求从症状回溯到最早的可疑故障，映射调用方、数据流、状态和边界，修正错误假设的起源层，并搜索共享同一模式的相邻缺陷；证据不足用 `[待确认]`，竞争解释用 `[另一解]`，回归测试同时覆盖已报告失败和共享失败模式。
+- 该 procedure 内置 **failure-surface matrix**：编辑前必须列出 surface、输入形态、期望行为、最小测试和状态；输入形态必须从该 surface 自身的契约推导，不能复制一个 happy path。`pending` 不算结果，未覆盖项必须标记 `not covered` 并作为残余风险报告。
+- 入口触发表新增 “Debug a failure, trace a regression, or investigate a bug report”。
+
+### Changed
+
+- 入口第 4 步与 `AGENT__rules` 的 triage 硬规则：bug、回归或事故任务必须读 `fix-the-cause-not-the-symptom`；行为/正确性任务仍必须读 `turn-the-problem-into-math`。
+
+## 7.1.0 — 2026-11-12
+
+### Changed
+
+- 默认协作模式从 Copilot 改为 Autopilot：`project_conventions.md`、`AGENT__collaboration` 的回退值、首次会话提问默认值、README 与日志示例同步。
+- 这次改动只改变默认提问/汇报密度，不改变授权红线；需要人类逐步骤确认的项目仍可在 `project_conventions.md` 写回 Copilot。
+
 ## 7.0.0 — 2026-11-12
 
 与 6.x 的程序文件名不兼容。安装器只补新文件，旧文件保留；升级时按 `UPGRADING.md` 的旧→新表迁移链接后删除旧文件。

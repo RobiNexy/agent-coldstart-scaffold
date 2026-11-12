@@ -2,7 +2,7 @@
 
 - Status: final
 - As of: 2026-11-12
-- Scope: framework 7.0.0；不改变已安装项目的既有行为，除非项目主动登记工具
+- Scope: framework 7.5.0；不改变已安装项目的既有行为，除非项目主动登记工具
 
 本文按 `AGENT__procedure__turn-the-problem-into-math` 的六步组织：框架选择 → 形式陈述 → 交叉论证 → 反例与边界优先 → 落地 → 独立校验。
 
@@ -202,7 +202,7 @@ C1 来自一次真实的锁协议审计：TLA+ 本身有价值，但“LLM 自�
 | 基线能力 | `lint.sh` / `lint.ps1`、`bash` / `pwsh`、`git`、`ls`/`find`/`grep`、可选 `rg`；不进入登记表 |
 | `scaffold/00__AGENT__START_HERE.md` | 允许类型表加入 `TOOLS`；位置表加入登记表；触发项加入 tooling 程序 |
 | `scaffold/20__PROJECT_CONTEXT/TOOLS__tool-registry.md` | 默认空登记表；安装后即可通过 lint |
-| `scaffold/30__PROCEDURES/AGENT__procedure__you-have-tools-and-rules.md` | 工具治理程序：类别、生命周期、安装、验证、gate、退役 |
+| `scaffold/30__PROCEDURES/00__GENERAL/AGENT__procedure__you-have-tools-and-rules.md` | 工具治理程序：类别、生命周期、安装、验证、gate、退役 |
 | `templates/tooling/_TEMPLATE__TOOLS.md` | 可选模板；包含一个完整示例条目 |
 | `lint.sh` / `lint.ps1` | L14 登记表字段；L15 gate / uploads 的 ADR 门槛 |
 | `scaffold/.gitignore` | 忽略 `.tools/`；仓库只存清单和引导脚本 |

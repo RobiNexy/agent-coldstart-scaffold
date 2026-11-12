@@ -10,7 +10,7 @@
 - **人类是队友，不只是审批者。** 人类时间有价格，但 `sudo`、GUI 点击、登录授权、凭据和品味判断对人是几秒、对 Agent 可能是长时间绕路。Agent 应在两次尝试后直接求助。
 - **日志先写，整理后蒸馏。** 每个任务结束机械地写一条会话日志，不做“值不值得记”的判断；判断推迟到 compaction，那时证据齐全。日志同时是观察这套工作流是否有效的仪器。
 - **列表即索引。** 任何会被工具列出的东西——文件名、提交信息、测试名、日志条目——都应在列表中自解释。文件名是稳定的 ID，文件前几行是可 grep 的元数据，正文才是权威。
-- **程序目录是必检项，不是参考表。** 每次会话先 `ls 30__PROCEDURES/`，读取与任务匹配的程序，并在日志里写一行 `Task type → procedure` triage；入口的触发表只是索引。行为或正确性任务必须读 `turn-the-problem-into-math`。
+- **程序目录是必检项，而且先写计划。** 每次会话先 `ls -R 30__PROCEDURES/`，在 journal 的 `## Procedure plan` 里对每个候选写 `read` / `defer` / `skip` 和理由，再写一行 `Task type → procedure` triage；不能只挑最像的那一个。所有 `read` 必须在第一次编辑前读完。行为或正确性任务必须读 `turn-the-problem-into-math`；bug/回归必须读 `fix-the-cause-not-the-symptom`；已有代码库的行为修改还必须读 `map-the-existing-system-first`、`pin-the-behavior-before-you-change-it`、`make-the-smallest-diff-that-works`、`write-tests-that-can-fail`；改共享契约必须读 `know-what-else-uses-it`。
 - **常驻规则真的常驻。** `10__ALWAYS_LOAD/` 每次会话全部加载，因此必须小：CI 强制它与入口合计不超过 3000 个英文词。
 
 ## 解决什么问题
@@ -98,27 +98,38 @@ AGENTS.md                                   宿主钩子，只有一句指向入
   project_conventions.md                    命令、环境、Git、默认协作模式
   domain_terminology_glossary.md
   TOOLS__tool-registry.md                   外部工具登记、版本、校验和与 gate 决策
-30__PROCEDURES/                             做某类事时读取
-  AGENT__procedure__write-down-the-adr.md
-  AGENT__procedure__turn-the-problem-into-math.md
-  AGENT__procedure__you-have-tools-and-rules.md              外部工具的提出、安装、验证、gate 与退役
-  AGENT__procedure__cicd-pipeline.md
-  AGENT__procedure__docker-configuration.md
-  AGENT__procedure__git-discipline.md
-  AGENT__procedure__writing-user-manual.md
-  AGENT__procedure__go-engineering.md
-  AGENT__procedure__rust-engineering.md
-  AGENT__procedure__c-cpp-engineering.md
-  AGENT__procedure__latex-authoring.md
-  AGENT__procedure__find-the-ui-design-language.md
-  AGENT__procedure__go-find-evidence-and-do-some-research.md
-  AGENT__procedure__long-form-writing.md
-  AGENT__procedure__coworkers-are-working-in-parallel-dont-mess-it-up.md
-  AGENT__procedure__read-the-paper.md
-  AGENT__procedure__when-ending-the-task.md
-  AGENT__procedure__tidy-the-journal.md
-  AGENT__procedure__first-day-on-the-project.md
-  AGENT__procedure__check-before-you-ship.md
+30__PROCEDURES/                             做某类事时读取，按语境分目录
+  00__GENERAL/                              任何项目都可能用到
+    AGENT__procedure__write-down-the-adr.md
+    AGENT__procedure__fix-the-cause-not-the-symptom.md         调试、根因定位与系统性影响分析
+    AGENT__procedure__write-tests-that-can-fail.md             测试风险排序、回归测试与 test-strength audit
+    AGENT__procedure__turn-the-problem-into-math.md
+    AGENT__procedure__you-have-tools-and-rules.md              外部工具的提出、安装、验证、gate 与退役
+    AGENT__procedure__cicd-pipeline.md
+    AGENT__procedure__docker-configuration.md
+    AGENT__procedure__git-discipline.md
+    AGENT__procedure__writing-user-manual.md
+    AGENT__procedure__go-engineering.md
+    AGENT__procedure__rust-engineering.md
+    AGENT__procedure__c-cpp-engineering.md
+    AGENT__procedure__latex-authoring.md
+    AGENT__procedure__find-the-ui-design-language.md
+    AGENT__procedure__go-find-evidence-and-do-some-research.md
+    AGENT__procedure__long-form-writing.md
+    AGENT__procedure__coworkers-are-working-in-parallel-dont-mess-it-up.md
+    AGENT__procedure__read-the-paper.md
+    AGENT__procedure__when-ending-the-task.md
+    AGENT__procedure__tidy-the-journal.md
+    AGENT__procedure__check-before-you-ship.md
+  10__STARTING_A_NEW_PROJECT/               从零开始一个项目
+    AGENT__procedure__first-day-on-the-project.md
+  20__TAKING_OVER_A_LEGACY_PROJECT/         接手已有代码
+    AGENT__procedure__map-the-existing-system-first.md         旧系统运行地图：入口、数据流、契约、构建/测试/部署、历史与 fork 基线
+    AGENT__procedure__pin-the-behavior-before-you-change-it.md 先用 golden/record-replay/契约测试固定旧行为，再改代码
+    AGENT__procedure__know-what-else-uses-it.md                跨 surface 的调用方、兼容承诺与覆盖率矩阵
+    AGENT__procedure__make-the-smallest-diff-that-works.md     最小可行 diff，保留无关 API、风格与错误文本
+    AGENT__procedure__keep-the-fork-in-sync.md                 上游基线、补丁清单、选择性 port 与本地契约验证
+    AGENT__procedure__change-it-without-breaking-callers.md    兼容契约、迁移/弃用/回滚，不破坏旧调用方
 40__MEMORY/                                 写入层
   journal/                                  每任务一条会话日志
   tasks/                                    并行任务领取（TASK__）
@@ -135,9 +146,42 @@ AGENTS.md                                   宿主钩子，只有一句指向入
 
 脚手架不创建业务代码、测试、文档或人类资料目录；沿用项目已有布局。人类撰写的原始资料可选放在项目根目录 `human-source/`，该目录不会自动创建；若存在，Agent 默认只读、引用来源、不编辑不移动，只有用户明确要求时才读取内容。
 
+## 程序计划
+
+任务开始时，Agent 先在 journal 写 `## Procedure plan`，再调查或编辑。计划从两个轴出发：
+
+- 任务形态：bug/回归、行为变更、重构、新功能、公开契约/迁移、事故、文档、评审。
+- 仓库语境：新项目、已有/陌生代码库、共享组件、测试薄弱、fork/upstream、生产路径。
+
+每条候选程序写 `read` / `defer` / `skip` 和一句理由。`skip` 只有在触发条件明确不存在时才允许；不确定写 `defer`，并写清楚什么观察能决定。所有 `read` 必须在第一次编辑前读完。计划里先回答一组是非题：已有代码库？行为变更？共享组件？测试薄弱？fork/upstream？公开契约？生产路径？bug/回归？commit/branch？每个 `yes` 都触发 `AGENT__rules` 的强制默认，并标成 `read`。已有代码库里的行为修改，默认强制读 `map-the-existing-system-first`、`pin-the-behavior-before-you-change-it`、`make-the-smallest-diff-that-works`、`write-tests-that-can-fail`；bug/回归还强制 `fix-the-cause-not-the-symptom`、`turn-the-problem-into-math`；共享组件、fork、公开契约、生产路径各有默认。计划随新证据更新，不能只列最像的那一个。failure-surface matrix 必须从 `know-what-else-uses-it` 的接口/注册表清单开始，而不是从怀疑的表面开始。
+
+## 测试
+
+`write-tests-that-can-fail` 是验证环节的入口。它不追求测试数量，先按后果排序：数据丢失、静默错误、关键流程失败优先；再看边界、状态变化、恢复和高频路径。
+
+硬规则：
+
+- 证明修复的新测试必须在修改前失败；修改前就通过的测试不是回归测试。固定现状的 characterization test 另行记录，不用它冒充回归测试。
+- 断言完整可观察契约，不用 `assertIn` 或存在性代理；顺序、字段、错误、状态都要精确。
+- 用仓库里最复杂的真实 payload / fixture，不自己编最小例子。
+- 结束前写 test-strength audit：断言了什么、没断言什么、什么失败仍可能漏过。
+
+## 旧项目维护
+
+新项目和旧项目的起手不同。新项目先确定目的、边界和命令；旧项目先重建“它今天怎么运行”的证据，再动代码。`30__PROCEDURES/20__TAKING_OVER_A_LEGACY_PROJECT/` 按维护闭环组织：
+
+1. `map-the-existing-system-first`：入口、数据流、契约、构建/测试/部署、历史与 fork 基线。
+2. `pin-the-behavior-before-you-change-it`：先用 golden master、record/replay 或契约测试固定现状。
+3. `know-what-else-uses-it`：列出调用方、兼容承诺、每个 surface 的覆盖状态。
+4. `make-the-smallest-diff-that-works`：最小改动，保留无关 API、风格、错误文本和日志格式。
+5. `keep-the-fork-in-sync`：有 upstream 时，记录基线、选择性 port、验证本地契约。
+6. `change-it-without-breaking-callers`：改公开契约时，设计迁移、弃用和回滚。
+
+`fix-the-cause-not-the-symptom` 负责修 bug 的因果追踪；它的 failure-surface matrix 是第 3 步在调试场景下的强制版本。
+
 ## 协作模式
 
-Agent 与人的互动密度由模式控制，默认值写在目标项目的 `20__PROJECT_CONTEXT/project_conventions.md`，未填写时回退到 Copilot。模式只改变提问频率和汇报节奏，不改变授权红线。
+Agent 与人的互动密度由模式控制，默认值写在目标项目的 `20__PROJECT_CONTEXT/project_conventions.md`，未填写时回退到 Autopilot。模式只改变提问频率和汇报节奏，不改变授权红线。
 
 | 模式 | 人类状态 | 行为 |
 |---|---|---|
@@ -151,7 +195,7 @@ Agent 与人的互动密度由模式控制，默认值写在目标项目的 `20_
 
 每个任务在 `40__MEMORY/journal/` 写一个文件，文件名是 `YYYY-MM-DD-HHMM__主题.md`，例如 `2026-11-10-1430__fix-login-redirect-loop.md`。`ls` 该目录就是项目时间线。
 
-任务开始时先写头部（`Mode`、`Task`、`Procedures: pending`），并先列 `30__PROCEDURES/`、读取匹配程序；任务结束时把 `Procedures` 补成 `[[程序]] — 理由`，或 `none`（仅纯文档或单文件琐碎修改），再补全 `Did`、`Verified`、`Blocked`、`Touched`、`Next`。有 `Task` 而没有 `Did` 的条目意味着上个会话中断，下一个会话应优先读它。日志与代码、ADR、现状文件冲突时，以代码和 ADR 为准。
+任务开始时先写头部（`Mode`、`Task`、`Procedures: pending`），并先 `ls -R 30__PROCEDURES/`、写 `## Procedure plan`（每条候选 `read` / `defer` / `skip` + 理由），再读所有 `read` 程序；任务结束时把 `Procedures` 补成 `[[程序]] — read — 理由` / `[[程序]] — skipped — 理由`，或 `none`（仅纯文档或单文件琐碎修改），再补全 `Did`、`Verified`、`Blocked`、`Touched`、`Next`。有 `Task` 而没有 `Did` 的条目意味着上个会话中断，下一个会话应优先读它。日志与代码、ADR、现状文件冲突时，以代码和 ADR 为准。
 
 `journal/` 超过 20 条或用户要求整理时，按 `AGENT__procedure__tidy-the-journal.md` 执行 compaction：把持久事实蒸馏进现状、任务板、ADR 和待裁决文件，写一个 `SUMMARY__<起>_to_<止>.md`，删除原始条目（Git 保留历史），并向人类报告统计——中断次数、未验证次数、求助次数与类型、平均尝试次数。这些统计是判断这套工作流是否真的有效的依据。
 
@@ -163,7 +207,7 @@ Agent 与人的互动密度由模式控制，默认值写在目标项目的 `20_
 - `50__RESEARCH/<topic>/RESEARCH__<question>.md`：问题契约、检索记录、证据表、结论与置信度。开头先写“支持哪个决策、什么证据算够、何时停止”。
 - `50__RESEARCH/<topic>/REPORT__<title>.md`：面向读者的长文，引用 `RESEARCH__` 与 `SOURCE__`。
 
-研究不是每个任务的必经阶段，只在决策依赖外部证据时触发。学术调研与技术调研共用同一结构，区别在证据标准：前者看同行评审、方法与复现，后者优先官方文档、源码、可复现的 benchmark 或 spike。程序见 `30__PROCEDURES/AGENT__procedure__go-find-evidence-and-do-some-research.md` 与 `AGENT__procedure__long-form-writing.md`。
+研究不是每个任务的必经阶段，只在决策依赖外部证据时触发。学术调研与技术调研共用同一结构，区别在证据标准：前者看同行评审、方法与复现，后者优先官方文档、源码、可复现的 benchmark 或 spike。程序见 `30__PROCEDURES/00__GENERAL/AGENT__procedure__go-find-evidence-and-do-some-research.md` 与 `AGENT__procedure__long-form-writing.md`。
 
 ## 并行会话
 
@@ -175,7 +219,7 @@ Agent 与人的互动密度由模式控制，默认值写在目标项目的 `20_
 - 并行模式下日志文件名追加 `--<owner>`，避免同分钟碰撞。
 - 集成 session 一次合并一个分支，每合一个重跑 `lint` 与相关测试；不要最后一次性合并。
 
-完整规则见 `30__PROCEDURES/AGENT__procedure__coworkers-are-working-in-parallel-dont-mess-it-up.md`。
+完整规则见 `30__PROCEDURES/00__GENERAL/AGENT__procedure__coworkers-are-working-in-parallel-dont-mess-it-up.md`。
 
 ## 工具层
 
@@ -199,7 +243,7 @@ Agent 与人的互动密度由模式控制，默认值写在目标项目的 `20_
 
 只有 `verified` 条目才能用于任务；只有 `verified` 且链接了 Accepted ADR 的工具才能升为 `gate`。`Data: uploads` 的条目在进入 `declared` 前必须链接 Accepted ADR，并且每次外发仍受 `AGENT__rules` 的授权约束。工具二进制不提交进仓库，放在 `.tools/`（已加入 `.gitignore`）。
 
-`TOOLS` 是新增的知识类型，登记表文件名为 `TOOLS__tool-registry.md`。完整设计、反例与边界见 [`docs/TOOLING_DESIGN.md`](docs/TOOLING_DESIGN.md)，操作程序见 `30__PROCEDURES/AGENT__procedure__you-have-tools-and-rules.md`。
+`TOOLS` 是新增的知识类型，登记表文件名为 `TOOLS__tool-registry.md`。完整设计、反例与边界见 [`docs/TOOLING_DESIGN.md`](docs/TOOLING_DESIGN.md)，操作程序见 `30__PROCEDURES/00__GENERAL/AGENT__procedure__you-have-tools-and-rules.md`。
 
 ## 宿主集成
 
@@ -262,7 +306,7 @@ Copy-Item (Join-Path $sourceDir 'templates/feature/_TEMPLATE__FEATURE.md') `
 
 安装器不会覆盖或删除已有文件，所以升级不只是“重跑安装器”。完整流程写在 [`UPGRADING.md`](UPGRADING.md)，由 Agent 在目标项目中逐项执行：识别已安装版本 → 列出新增与已改动文件 → 安装器补齐新文件 → 合并本地修改 → 清理旧路径 → 运行 `--verify`、`lint` 与词数检查。
 
-版本识别的依据是目标 `00__AGENT__START_HERE.md` 第一行的标记（例如 `<!-- agent-coldstart-scaffold entry v7.0.0 -->`）与源码根目录的 `VERSION`。两者不一致时，Agent 按 `UPGRADING.md` 的版本说明逐段升级。
+版本识别的依据是目标 `00__AGENT__START_HERE.md` 第一行的标记（例如 `<!-- agent-coldstart-scaffold entry v7.5.0 -->`）与源码根目录的 `VERSION`。两者不一致时，Agent 按 `UPGRADING.md` 的版本说明逐段升级。
 
 从 v5 或 v4.1 升级时，人工要点：
 

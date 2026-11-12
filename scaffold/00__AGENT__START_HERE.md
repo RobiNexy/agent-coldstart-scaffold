@@ -1,4 +1,4 @@
-<!-- agent-coldstart-scaffold entry v7.0.0 -->
+<!-- agent-coldstart-scaffold entry v7.5.0 -->
 # Agent Start Here
 
 You are an agent helping maintain this project. This is the only entry point. Load every file in `10__ALWAYS_LOAD/` at the start of each session; it is kept small on purpose. Read everything else only when the task calls for it.
@@ -7,10 +7,11 @@ You are an agent helping maintain this project. This is the only entry point. Lo
 
 1. Run `ls -F .` and, if this is a Git repository, `git status --short`. Never overwrite or discard changes you did not make.
 2. Run `ls 40__MEMORY/journal/` and read the newest entry. If it has a `Task:` line but no `Did:` line, the previous session was interrupted: read that entry fully before anything else.
-3. Run `ls 30__PROCEDURES/` and read every procedure whose filename matches the task. This is mandatory, not optional reading: the trigger table below is an index, not a substitute for the directory listing. When the task has a journal entry, record what you read in its `Procedures` field; write `none` if no procedure matches.
-4. Before editing, write a one-line triage in the journal: `Task type → procedure`. Behavior or correctness work requires [[AGENT__procedure__turn-the-problem-into-math]]; commit or branch work requires [[AGENT__procedure__git-discipline]]. `none` is valid only for pure documentation or a single trivial local edit.
-5. Read what the task needs: `20__PROJECT_CONTEXT/project_conventions.md` for commands and environments, `20__PROJECT_CONTEXT/TOOLS__tool-registry.md` for external tools, relevant design docs, relevant code. If the task is clear and local, start. Ask only when different readings would materially change the result.
-6. When a task ends, follow [[AGENT__procedure__when-ending-the-task]].
+3. Run `ls -R 30__PROCEDURES/`. The full listing is mandatory; the trigger table below is an index, not a substitute for the directory listing.
+4. Before investigating or editing, write an explicit **procedure plan** in the journal. Start from the task shape (bug/regression, behavior change, refactor, new feature, public contract/migration, incident, docs, review) and the repository context (new project, existing/unfamiliar codebase, shared component, weak/missing tests, fork/upstream, production path). Answer the context sweep explicitly: existing codebase, behavior change, shared component, weak tests, fork/upstream, public contract, production path, bug/regression, commit/branch. Every "yes" makes the matching defaults in [[AGENT__rules]] mandatory and marked `read`. For every candidate procedure, record `read`, `defer` or `skip` with a one-line reason. `skip` requires the trigger to be clearly absent; uncertainty is `defer` plus the observation that resolves it. Read every `read` procedure before the first edit, and update the plan when investigation changes the task shape. A pure documentation or single trivial local edit may record `none — reason` instead of a table.
+5. Write the one-line triage in the journal: `Task type → procedure`. It must agree with the procedure plan. `none` is valid only for pure documentation or a single trivial local edit.
+6. Read what the task needs: `20__PROJECT_CONTEXT/project_conventions.md` for commands and environments, `20__PROJECT_CONTEXT/TOOLS__tool-registry.md` for external tools, relevant design docs, relevant code. If the task is clear and local, start. Ask only when different readings would materially change the result.
+7. When a task ends, follow [[AGENT__procedure__when-ending-the-task]].
 
 ## Where things are
 
@@ -18,7 +19,7 @@ You are an agent helping maintain this project. This is the only entry point. Lo
 |---|---|
 | Behavioral rules (always loaded) | `10__ALWAYS_LOAD/` |
 | Purpose, boundaries, conventions, commands, environments, glossary | `20__PROJECT_CONTEXT/` |
-| How to do specific things | `30__PROCEDURES/` — see table below |
+| How to do specific things | `30__PROCEDURES/` — see table below; subdirectories separate general, new-project, and legacy-project procedures |
 | What happened recently | `40__MEMORY/journal/` (newest entries only) |
 | What is true now / unfinished work / decisions awaiting a human | `40__MEMORY/project_state_now.md`, `task_board.md`, `open_questions_for_human.md` |
 | Active work claims and ownership | `40__MEMORY/tasks/` |
@@ -33,6 +34,8 @@ The table is an index; step 3 requires the directory listing.
 | When you are about to… | Read first |
 |---|---|
 | Create, accept, reject or supersede an ADR | [[AGENT__procedure__write-down-the-adr]] |
+| Debug a failure, trace a regression, or investigate a bug report | [[AGENT__procedure__fix-the-cause-not-the-symptom]] |
+| Write or review tests, or verify a behavior change | [[AGENT__procedure__write-tests-that-can-fail]] |
 | Solve an algorithm, concurrency, type-system or correctness problem formally | [[AGENT__procedure__turn-the-problem-into-math]] |
 | Change a CI/CD pipeline, deployment stage or rollback path | [[AGENT__procedure__cicd-pipeline]] |
 | Configure Docker, a compose stack or its build context | [[AGENT__procedure__docker-configuration]] |
@@ -51,6 +54,12 @@ The table is an index; step 3 requires the directory listing.
 | Finish a task | [[AGENT__procedure__when-ending-the-task]] |
 | Tidy the knowledge base, or `journal/` has more than 20 entries | [[AGENT__procedure__tidy-the-journal]] |
 | Work in a freshly installed project | [[AGENT__procedure__first-day-on-the-project]] |
+| Take over an unfamiliar existing or legacy codebase | [[AGENT__procedure__map-the-existing-system-first]] |
+| Change behavior that has weak or missing tests | [[AGENT__procedure__pin-the-behavior-before-you-change-it]] |
+| Change a shared API, schema, configuration, wire format or parser | [[AGENT__procedure__know-what-else-uses-it]] |
+| Edit unfamiliar legacy code without rewriting it | [[AGENT__procedure__make-the-smallest-diff-that-works]] |
+| Reconcile a fork with its upstream | [[AGENT__procedure__keep-the-fork-in-sync]] |
+| Change or migrate a public contract | [[AGENT__procedure__change-it-without-breaking-callers]] |
 | Touch deployment, infrastructure, or anything on the path to production | [[AGENT__procedure__check-before-you-ship]] |
 
 ## Naming is the index

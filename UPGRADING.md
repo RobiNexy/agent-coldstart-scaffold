@@ -17,7 +17,7 @@ The installer only adds missing files and never overwrites. An upgrade therefore
 The first line of the target `00__AGENT__START_HERE.md` carries the version marker:
 
 ```text
-<!-- agent-coldstart-scaffold entry v7.0.0 -->
+<!-- agent-coldstart-scaffold entry v7.5.0 -->
 ```
 
 The version in that marker is the installed version.
@@ -162,6 +162,48 @@ This release renames procedure files. It is a breaking change for `[[links]]` an
 - Delete the old procedure files only after all links and path references are migrated. `legacy-paths.txt` lists them; the installer will warn until they are removed.
 - The entry marker changes to `v7.0.0`.
 - Renamed files are not automatically deleted by the installer.
+
+### 7.4.0 → 7.5.0
+
+- New procedure `30__PROCEDURES/00__GENERAL/AGENT__procedure__write-tests-that-can-fail.md`; the installer adds it automatically.
+- Merge `00__AGENT__START_HERE.md`: the trigger table gains the testing row, and the mandatory defaults in `AGENT__rules` add the new procedure for existing-code behavior changes and bug fixes.
+- Merge `10__ALWAYS_LOAD/AGENT__rules.md`: a behavior change is not verified unless the test failed on the pre-fix code and asserts the full observable contract.
+- Merge the `Verified` field rule and test-strength pointer in `AGENT__procedure__when-ending-the-task.md`.
+- Merge the cross-links in `pin-the-behavior-before-you-change-it` and `fix-the-cause-not-the-symptom`.
+- The entry marker changes to `v7.5.0`.
+- No installed asset was removed or renamed.
+
+### 7.3.0 → 7.4.0
+
+- Add the explicit procedure-plan step to `00__AGENT__START_HERE.md`: answer the context sweep, list candidates as `read` / `defer` / `skip`, read every `read` before editing, and update the plan when the task shape changes.
+- Merge the mandatory defaults into `10__ALWAYS_LOAD/AGENT__rules.md`.
+- Merge the `## Procedure plan` table and the `Procedures` field changes into `AGENT__procedure__when-ending-the-task.md`.
+- The entry marker changes to `v7.4.0`.
+- No installed asset was added, removed or renamed.
+
+### 7.2.0 → 7.3.0
+
+- `30__PROCEDURES/` now has three subdirectories: `00__GENERAL/`, `10__STARTING_A_NEW_PROJECT/`, `20__TAKING_OVER_A_LEGACY_PROJECT/`. All existing procedures moved; their filenames did not change, so `[[links]]` keep resolving.
+- The installer adds the nested files but does not delete the old flat files. After verifying every nested copy exists and every link resolves, remove the old `30__PROCEDURES/AGENT__procedure__*.md` files. `legacy-paths.txt` lists the 7.2.0 paths; the installer warns until they are removed.
+- New legacy-maintenance procedures: `map-the-existing-system-first`, `pin-the-behavior-before-you-change-it`, `know-what-else-uses-it`, `make-the-smallest-diff-that-works`, `keep-the-fork-in-sync`, `change-it-without-breaking-callers`.
+- Merge `00__AGENT__START_HERE.md` and `10__ALWAYS_LOAD/AGENT__rules.md`: procedure discovery now uses `ls -R 30__PROCEDURES/`; taking over an existing codebase requires the map procedure, and changing a shared contract requires the compatibility-review procedure.
+- Merge the pointer changes in `first-day-on-the-project` and `check-before-you-ship`.
+- The failure-surface matrix in `fix-the-cause-not-the-symptom` now asks for input shapes derived from each surface's contract instead of a fixed checklist.
+- The entry marker changes to `v7.3.0`.
+
+### 7.1.0 → 7.2.0
+
+- New procedure `30__PROCEDURES/AGENT__procedure__fix-the-cause-not-the-symptom.md`; the installer adds it automatically.
+- Merge `00__AGENT__START_HERE.md` and `10__ALWAYS_LOAD/AGENT__rules.md`: bug, regression and incident work now also requires the new procedure in the triage.
+- The entry marker changes to `v7.2.0`.
+- No installed asset was removed or renamed.
+
+### 7.0.0 → 7.1.0
+
+- The default collaboration mode changes from Copilot to Autopilot. Merge `20__PROJECT_CONTEXT/project_conventions.md` and `10__ALWAYS_LOAD/AGENT__collaboration.md`; the installer will not overwrite either file.
+- Merge the updated first-session default and the journal example in `AGENT__procedure__first-day-on-the-project.md` and `AGENT__procedure__when-ending-the-task.md`.
+- The entry marker changes to `v7.1.0`.
+- No installed asset was added, removed or renamed.
 
 ### Pre-v6 (v4.x, v5.x) → 6.x
 

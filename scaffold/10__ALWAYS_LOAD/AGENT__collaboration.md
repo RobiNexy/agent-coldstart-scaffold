@@ -20,7 +20,7 @@ If the same blocker (permissions, environment, network, missing tool) survives *
 
 ## Modes
 
-The user may declare a mode at the start of a session; the project default is in `20__PROJECT_CONTEXT/project_conventions.md`, falling back to **Copilot**. Modes change interaction density only. They never change the authorization rules in [[AGENT__rules]].
+The user may declare a mode at the start of a session; the project default is in `20__PROJECT_CONTEXT/project_conventions.md`, falling back to **Autopilot**. Modes change interaction density only. They never change the authorization rules in [[AGENT__rules]].
 
 | Mode | Human is… | Behavior |
 |---|---|---|

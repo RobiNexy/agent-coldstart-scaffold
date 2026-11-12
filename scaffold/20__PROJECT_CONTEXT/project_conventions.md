@@ -24,7 +24,7 @@
 
 ## Collaboration
 
-- Default mode (see [[AGENT__collaboration]]): Copilot
+- Default mode (see [[AGENT__collaboration]]): Autopilot
 - Design documents directory: `design/` unless stated otherwise
 
 ## External tools
