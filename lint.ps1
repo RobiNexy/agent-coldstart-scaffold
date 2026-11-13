@@ -6,7 +6,8 @@ Checks a project's knowledge base for mechanically detectable errors.
 .DESCRIPTION
 Scans every Markdown file in the target project and reports dangling or
 ambiguous [[links]], title/filename mismatches, invalid ADR status lines,
-orphan question references, incomplete journal entries and similar issues.
+invalid fork records, orphan question references, incomplete journal entries
+and similar issues.
 
 .PARAMETER TargetDir
 Project directory to scan. Defaults to the current directory.
@@ -57,7 +58,7 @@ $excluded = @(
 $allowedTypes = @(
     'AGENT', 'ADR', 'FEATURE', 'API', 'DATA', 'OPS',
     'SEQUENCE', 'STATE', 'DATAFLOW', 'MODULE', 'SUMMARY',
-    'SOURCE', 'RESEARCH', 'REPORT', 'TASK', 'TOOLS'
+    'SOURCE', 'RESEARCH', 'REPORT', 'TASK', 'TOOLS', 'FORK'
 )
 
 $script:errors = 0
@@ -93,6 +94,28 @@ function Test-ToolField {
     if ($count -ne 1) {
         Write-Finding 'ERROR' 'L14-tools-registry' $Display "tool '$EntryName': expected exactly one $Label"
     }
+}
+
+function Test-ForkField {
+    param(
+        [string] $Body,
+        [string] $Display,
+        [string] $Pattern,
+        [string] $Label
+    )
+    $count = Get-MultilineMatchCount $Body $Pattern
+    if ($count -ne 1) {
+        Write-Finding 'ERROR' 'L16-fork-record' $Display "expected exactly one $Label"
+    }
+}
+
+function Get-ForkValue {
+    param([string] $Body, [string] $Field)
+    $match = [regex]::Match($Body, "(?m)^- ${Field}: (.+)$")
+    if ($match.Success) {
+        return $match.Groups[1].Value.Trim().Trim([char]96)
+    }
+    return ''
 }
 
 function Get-RelativeDisplay {
@@ -255,6 +278,113 @@ foreach ($file in $files) {
         $startedCount = @($lines | Where-Object { $_ -match '^- Started: [0-9]{4}-[0-9]{2}-[0-9]{2}$' }).Count
         if ($statusCount -ne 1 -or $ownerCount -ne 1 -or $branchCount -ne 1 -or $scopeCount -ne 1 -or $startedCount -ne 1) {
             Write-Finding 'ERROR' 'L12-task-claim' $display "expected exactly one '- Status: active|blocked|done', '- Owner:', '- Branch:', '- Scope:' and '- Started: YYYY-MM-DD'"
+        }
+    }
+
+    # L16: fork records pin the upstream baseline and keep a valid patch ledger.
+    if ($stem.StartsWith('FORK__')) {
+        $content = (Get-Content -LiteralPath $file.FullName -Raw) -replace "`r`n", "`n"
+        Test-ForkField $content $display '^- Upstream: .+$' "'- Upstream:'"
+        Test-ForkField $content $display '^- Upstream ref: .+$' "'- Upstream ref:'"
+        Test-ForkField $content $display '^- Upstream status: (active|successor|archived)$' "'- Upstream status: active|successor|archived'"
+        Test-ForkField $content $display '^- Successor: .+$' "'- Successor:'"
+        Test-ForkField $content $display '^- License: .+$' "'- License:'"
+        Test-ForkField $content $display '^- Fork model: (patch-stack|periodic-merge|hard-fork|successor-tracking)$' "'- Fork model: patch-stack|periodic-merge|hard-fork|successor-tracking'"
+        Test-ForkField $content $display '^- Local release: (none|v?[0-9]+(\.[0-9]+){1,3}([-+][0-9A-Za-z.-]+)?)$' "'- Local release: none or a version'"
+        Test-ForkField $content $display '^- Last synced: ([0-9]{4}-[0-9]{2}-[0-9]{2}|never)$' "'- Last synced: YYYY-MM-DD or never'"
+        Test-ForkField $content $display '^- Sync cadence: .+$' "'- Sync cadence:'"
+        Test-ForkField $content $display '^- Revisit when: .+$' "'- Revisit when:'"
+
+        $upstream = Get-ForkValue $content 'Upstream'
+        $upstreamRef = Get-ForkValue $content 'Upstream ref'
+        $upstreamStatus = Get-ForkValue $content 'Upstream status'
+        $successor = Get-ForkValue $content 'Successor'
+        $license = Get-ForkValue $content 'License'
+        $forkModel = Get-ForkValue $content 'Fork model'
+        $syncCadence = Get-ForkValue $content 'Sync cadence'
+        $revisitWhen = Get-ForkValue $content 'Revisit when'
+
+        if ($upstream -and $upstream -notmatch '^(https?://\S+|git://\S+|git@\S+|ssh://\S+)$') {
+            Write-Finding 'ERROR' 'L16-fork-record' $display "'- Upstream:' must be a URL or Git remote, not '$upstream'"
+        }
+        elseif ($upstream -and $upstream -match '^https?://(www\.)?example\.(com|org|net)(/|$)') {
+            Write-Finding 'ERROR' 'L16-fork-record' $display "'- Upstream:' still points at an example host; record the real repository"
+        }
+        if ($upstreamRef -and $upstreamRef -notmatch '^(v?[0-9]+(\.[0-9]+){1,3}([-+][0-9A-Za-z.-]+)?|[0-9a-fA-F]{40})$') {
+            Write-Finding 'ERROR' 'L16-fork-record' $display "'- Upstream ref:' must be a version tag or a full 40-character commit SHA, not '$upstreamRef'"
+        }
+        if ($license -and $license -match '^(unknown|tbd|n/?a|none|spdx identifier|\?)$') {
+            Write-Finding 'ERROR' 'L16-fork-record' $display "'- License:' must name the reviewed license, not '$license'"
+        }
+        if ($syncCadence -and $syncCadence -match '^(unknown|tbd|\?)$') {
+            Write-Finding 'ERROR' 'L16-fork-record' $display "'- Sync cadence:' must be concrete, not '$syncCadence'"
+        }
+        if ($revisitWhen -and $revisitWhen -match '^(unknown|tbd|\?)$') {
+            Write-Finding 'ERROR' 'L16-fork-record' $display "'- Revisit when:' must be concrete, not '$revisitWhen'"
+        }
+        if ($upstreamStatus -eq 'successor' -and (-not $successor -or $successor -match '^(none|-)$')) {
+            Write-Finding 'ERROR' 'L16-fork-record' $display "'- Upstream status: successor' requires a named '- Successor:'"
+        }
+        if ($upstreamStatus -eq 'archived' -and ($forkModel -eq 'patch-stack' -or $forkModel -eq 'periodic-merge')) {
+            Write-Finding 'ERROR' 'L16-fork-record' $display "an archived upstream cannot use Fork model '$forkModel'; use hard-fork or successor-tracking"
+        }
+        if ($forkModel -eq 'successor-tracking' -and $upstreamStatus -ne 'successor' -and $upstreamStatus -ne 'archived') {
+            Write-Finding 'ERROR' 'L16-fork-record' $display "'Fork model: successor-tracking' requires Upstream status 'successor' or 'archived'"
+        }
+        if ($forkModel -eq 'successor-tracking' -and (-not $successor -or $successor -match '^(none|-)$')) {
+            Write-Finding 'ERROR' 'L16-fork-record' $display "'Fork model: successor-tracking' requires a named '- Successor:'"
+        }
+        if ($successor -match '^https?://(www\.)?example\.(com|org|net)(/|$)') {
+            Write-Finding 'ERROR' 'L16-fork-record' $display "'- Successor:' still points at an example host; record the real repository or 'none'"
+        }
+
+        if ($content -notmatch '(?m)^## Local patch inventory\s*$') {
+            Write-Finding 'ERROR' 'L16-fork-record' $display "missing '## Local patch inventory' section"
+        }
+        $sectionMatch = [regex]::Match($content, '(?ms)^## Local patch inventory\s*\r?\n(.*?)(?=^## |\z)')
+        if ($sectionMatch.Success) {
+            foreach ($line in ($sectionMatch.Groups[1].Value -split "`n")) {
+                if (-not $line.TrimStart().StartsWith('|')) { continue }
+                $body = $line.Trim()
+                if ($body.StartsWith('|')) { $body = $body.Substring(1) }
+                if ($body.EndsWith('|')) { $body = $body.Substring(0, $body.Length - 1) }
+                $parts = @($body -split '\|' | ForEach-Object { $_.Trim().Trim([char]96) })
+                if ($parts.Count -gt 7) {
+                    Write-Finding 'ERROR' 'L16-fork-record' $display "patch '$($parts[0])': expected 7 columns, found $($parts.Count)"
+                    continue
+                }
+                if ($parts.Count -lt 7) {
+                    Write-Finding 'ERROR' 'L16-fork-record' $display "patch '$($parts[0])': expected 7 columns, found $($parts.Count)"
+                    continue
+                }
+                $p1 = $parts[0]
+                if ($p1 -eq 'Patch' -or $p1 -match '^:?-{3,}:?$') { continue }
+                if ([string]::IsNullOrWhiteSpace($p1)) {
+                    Write-Finding 'ERROR' 'L16-fork-record' $display 'patch row has an empty patch id'
+                    continue
+                }
+                if ($p1 -match '^<.*>$') {
+                    Write-Finding 'ERROR' 'L16-fork-record' $display "patch '$p1': replace the placeholder patch id"
+                }
+                if ($parts[1] -notmatch '^[0-9a-fA-F]{7,40}$') {
+                    Write-Finding 'ERROR' 'L16-fork-record' $display "patch '$p1': '- Local commit' must be a 7-40 character commit SHA, found '$($parts[1])'"
+                }
+                if ([string]::IsNullOrWhiteSpace($parts[2])) {
+                    Write-Finding 'ERROR' 'L16-fork-record' $display "patch '$p1': missing upstream provenance in the Upstream provenance column"
+                }
+                if ([string]::IsNullOrWhiteSpace($parts[3])) {
+                    Write-Finding 'ERROR' 'L16-fork-record' $display "patch '$p1': missing reason in the Why column"
+                }
+                if ([string]::IsNullOrWhiteSpace($parts[4])) {
+                    Write-Finding 'ERROR' 'L16-fork-record' $display "patch '$p1': missing surface in the Surface column"
+                }
+                if ([string]::IsNullOrWhiteSpace($parts[5])) {
+                    Write-Finding 'ERROR' 'L16-fork-record' $display "patch '$p1': missing test in the Test column"
+                }
+                if ($parts[6] -notmatch '^(active|upstreamed|obsolete|blocked)$') {
+                    Write-Finding 'ERROR' 'L16-fork-record' $display "patch '$p1': Status must be active|upstreamed|obsolete|blocked, found '$($parts[6])'"
+                }
+            }
         }
     }
 

@@ -2,6 +2,24 @@
 
 重要变更记录。每次发布前更新对应版本条目。
 
+## 7.6.0 — 2026-11-13
+
+### Added
+
+- 新增 `AGENT__procedure__fork-an-open-source-project.md`：把开源 fork 当作同时受 upstream 契约和本地用户契约约束的长期衍生项目，覆盖 fork 决策、upstream/继任者选择、许可与 notice 义务、Git/分支模型、基线验证、补丁纪律、发布与安全路径。
+- 新增知识类型 `FORK` 与模板 `templates/fork/_TEMPLATE__FORK.md`：记录 pinned baseline、许可证、fork 模型、本地补丁清单、本地契约、同步日志、发布/安全和退出条件。
+- 入口触发表新增“Start or restructure a fork”；类型表加入 `FORK`，`lint.sh` / `lint.ps1` 的允许类型同步加入 `FORK`，避免新建的 fork 记录被报成未知类型。
+- `lint` 新增 `L16-fork-record`：校验 `FORK__*.md` 必填字段唯一性、upstream ref 不是移动引用、upstream/successor 不是示例地址、status 与 fork model 的组合约束，以及补丁清单的列数、commit、上游来源、理由、影响面、测试和状态。
+- `tests/fixtures/kb-good` 增加合法 `FORK__` 记录，`kb-bad` 增加非法记录并覆盖 `L16-fork-record`。
+
+### Changed
+
+- `keep-the-fork-in-sync` 重写为完整的 upstream 摄取流程：读 `FORK__`、分类变更与补丁、选择 rebase/merge、保留 provenance、双套验证、更新账本与发布说明，并明确许可证变更是 stop-and-ask。
+- `AGENT__rules` 的强制默认改为：fork/upstream 语境同时要求 `fork-an-open-source-project` 和 `keep-the-fork-in-sync`，不再只读同步程序。
+- `project_conventions.md` 新增 Fork and upstream 小节；`check-before-you-ship` 新增 fork 发布检查与许可/源码义务；`map-the-existing-system-first` 与 `first-day-on-the-project` 增加 fork 识别和 `FORK__` 入口。
+- README 新增“开源 fork 维护”，以 Clash 的归档和 GPL-3.0 为例说明 upstream 选择、继任者跟踪与发布义务。
+- 这次改动的依据：7.5.0 只有 `keep-the-fork-in-sync`，它回答“上游变了怎么挑”，没有 fork 决策、来源/许可、补丁账本、发布与安全路径；Clash 这类已归档上游还会让“同步”本身失效。
+
 ## 7.5.0 — 2026-11-12
 
 ### Added

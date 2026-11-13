@@ -128,6 +128,7 @@ AGENTS.md                                   宿主钩子，只有一句指向入
     AGENT__procedure__pin-the-behavior-before-you-change-it.md 先用 golden/record-replay/契约测试固定旧行为，再改代码
     AGENT__procedure__know-what-else-uses-it.md                跨 surface 的调用方、兼容承诺与覆盖率矩阵
     AGENT__procedure__make-the-smallest-diff-that-works.md     最小可行 diff，保留无关 API、风格与错误文本
+    AGENT__procedure__fork-an-open-source-project.md           开源 fork 的 upstream 选择、许可、补丁账本与发布约束
     AGENT__procedure__keep-the-fork-in-sync.md                 上游基线、补丁清单、选择性 port 与本地契约验证
     AGENT__procedure__change-it-without-breaking-callers.md    兼容契约、迁移/弃用/回滚，不破坏旧调用方
 40__MEMORY/                                 写入层
@@ -168,7 +169,7 @@ AGENTS.md                                   宿主钩子，只有一句指向入
 
 ## 旧项目维护
 
-新项目和旧项目的起手不同。新项目先确定目的、边界和命令；旧项目先重建“它今天怎么运行”的证据，再动代码。`30__PROCEDURES/20__TAKING_OVER_A_LEGACY_PROJECT/` 按维护闭环组织：
+新项目和旧项目的起手不同。新项目先确定目的、边界和命令；旧项目先重建“它今天怎么运行”的证据，再动代码。若项目本身是开源 fork，先用 `fork-an-open-source-project` 建立 `FORK__` 记录、确认 upstream 与许可，再进入下面的维护闭环。`30__PROCEDURES/20__TAKING_OVER_A_LEGACY_PROJECT/` 按维护闭环组织：
 
 1. `map-the-existing-system-first`：入口、数据流、契约、构建/测试/部署、历史与 fork 基线。
 2. `pin-the-behavior-before-you-change-it`：先用 golden master、record/replay 或契约测试固定现状。
@@ -178,6 +179,23 @@ AGENTS.md                                   宿主钩子，只有一句指向入
 6. `change-it-without-breaking-callers`：改公开契约时，设计迁移、弃用和回滚。
 
 `fix-the-cause-not-the-symptom` 负责修 bug 的因果追踪；它的 failure-surface matrix 是第 3 步在调试场景下的强制版本。
+
+## 开源 fork 维护
+
+在他人开源项目上做长期修改，不是“clone 后改代码”，而是一个有独立生命周期的衍生项目。工作流用设计文档目录（默认 `design/`）中的 `FORK__<upstream>.md` 记录唯一真相源，并在改动前先回答四个问题：
+
+- 是否真的需要 fork：配置、插件、构建期 patch 或上游 PR 是否足够？
+- fork 谁：原始仓库、活跃继任者，还是某个 vendor 分支？必须 pin 到 tag 或完整 commit。
+- 许可义务是什么：SPDX 许可证、版权与 notice、GPL/AGPL 源码提供、商标与命名限制。
+- 采用哪种模型：`patch-stack`、`periodic-merge`、`hard-fork` 或 `successor-tracking`。
+
+`FORK__` 至少记录 upstream URL、pinned ref、upstream 状态、许可证、fork 模型、本地发布版本、最近同步日期和同步节奏；补丁清单一行一个可回滚 patch，记录本地 commit、上游来源、理由、影响面、测试和状态（`active` / `upstreamed` / `obsolete` / `blocked`）。没有进入清单的本地修改，在下次同步时等于不存在。
+
+同步时按 `keep-the-fork-in-sync` 执行：先分类上游变更和本地补丁，再按 fork 模型选择 rebase 或 merge，使用 `git range-diff` / `cherry-pick -x` 保留来源，最后同时跑上游测试、本地契约测试和构建/发布冒烟。干净 merge 不等于行为兼容；上游测试也不能替代本地契约测试。
+
+发布 fork 产物前走 `check-before-you-ship`：版本号要能看出上游基线，产物要带许可证与 notice，GPL/AGPL 要满足源码提供义务，二进制要有校验和，更新说明要区分上游变更与本地补丁，并明确安全公告的跟踪者。
+
+以 Clash 为例：`Dreamacro/clash` 的公开仓库已在 2023 年删除/归档，许可证是 GPL-3.0。fork 它之前必须先决定是跟踪活跃继任者，还是接受 hard fork 并自己承担安全修复；同时把 YAML 配置、规则语法、代理协议、external controller API 和 dashboard 兼容性当作本地契约固定下来。代理工具还会接触凭据和流量，日志与遥测不能当作普通数据。
 
 ## 协作模式
 
@@ -278,12 +296,13 @@ Agent 与人的互动密度由模式控制，默认值写在目标项目的 `20_
 | `L13-task-board-reference` | ERROR | 任务板引用的 `TASK__*` 在 `40__MEMORY/tasks/` 中没有对应文件 |
 | `L14-tools-registry` | ERROR | `TOOLS__*.md` 缺少头部字段，或条目缺少/重复必填字段；`installed`/`verified` 缺 `Checksum`，`verified` 缺 `Smoke`/`Last verified`；版本不得为 `latest`、范围或通配 |
 | `L15-tools-gate` | ERROR | `gate` 未处于 `verified`，`gate` 或 `declared` 及以上的 `uploads` 未链接 Accepted ADR，或 `retired` 仍为 `gate` |
+| `L16-fork-record` | ERROR | `FORK__*.md` 缺少唯一必填字段；upstream ref 是移动引用或不是版本 tag/完整 commit；upstream/successor 仍是示例地址；status/model 非法或互相矛盾；补丁行缺列、commit/状态/理由/来源/影响面/测试不合法 |
 
 代码块与行内代码中的示例链接不参与 L1/L2，因此可以安全地在文档中展示 `[[name]]` 的写法。退出码：`0` 无错误，`1` 有错误，`2` 参数或环境错误。
 
 ## 按需使用模板
 
-模板位于仓库的 `templates/`，不属于默认安装资产：`decisions/`、`feature/`、`contracts/`、`data-models/`、`operations/`、`research/`、`tasks/`、`tooling/` 与四类 `diagrams/`。只在确有需要时复制到合适位置，删除不适用的小节，并改成与内容匹配的文件名和标题。例如，`source_dir` 使用前文创建的源码目录：
+模板位于仓库的 `templates/`，不属于默认安装资产：`decisions/`、`feature/`、`contracts/`、`data-models/`、`operations/`、`research/`、`tasks/`、`tooling/`、`fork/` 与四类 `diagrams/`。只在确有需要时复制到合适位置，删除不适用的小节，并改成与内容匹配的文件名和标题。例如，`source_dir` 使用前文创建的源码目录：
 
 ```bash
 mkdir -p /path/to/your-project/design
@@ -306,7 +325,7 @@ Copy-Item (Join-Path $sourceDir 'templates/feature/_TEMPLATE__FEATURE.md') `
 
 安装器不会覆盖或删除已有文件，所以升级不只是“重跑安装器”。完整流程写在 [`UPGRADING.md`](UPGRADING.md)，由 Agent 在目标项目中逐项执行：识别已安装版本 → 列出新增与已改动文件 → 安装器补齐新文件 → 合并本地修改 → 清理旧路径 → 运行 `--verify`、`lint` 与词数检查。
 
-版本识别的依据是目标 `00__AGENT__START_HERE.md` 第一行的标记（例如 `<!-- agent-coldstart-scaffold entry v7.5.0 -->`）与源码根目录的 `VERSION`。两者不一致时，Agent 按 `UPGRADING.md` 的版本说明逐段升级。
+版本识别的依据是目标 `00__AGENT__START_HERE.md` 第一行的标记（例如 `<!-- agent-coldstart-scaffold entry v7.6.0 -->`）与源码根目录的 `VERSION`。两者不一致时，Agent 按 `UPGRADING.md` 的版本说明逐段升级。
 
 从 v5 或 v4.1 升级时，人工要点：
 

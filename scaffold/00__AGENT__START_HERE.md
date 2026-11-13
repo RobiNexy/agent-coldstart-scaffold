@@ -1,4 +1,4 @@
-<!-- agent-coldstart-scaffold entry v7.5.0 -->
+<!-- agent-coldstart-scaffold entry v7.6.0 -->
 # Agent Start Here
 
 You are an agent helping maintain this project. This is the only entry point. Load every file in `10__ALWAYS_LOAD/` at the start of each session; it is kept small on purpose. Read everything else only when the task calls for it.
@@ -26,6 +26,7 @@ You are an agent helping maintain this project. This is the only entry point. Lo
 | Research questions, sources and long-form reports | `50__RESEARCH/` |
 | Tools the project may use, and their gate status | `20__PROJECT_CONTEXT/TOOLS__tool-registry.md` |
 | Design documents | The project's chosen directory; `design/` if none exists |
+| Fork baseline, license, patch inventory | `FORK__<upstream>.md` in the design directory |
 | Who references a file | `rg -nF '[[ADR__example' .` |
 | Human raw material | Optional `human-source/`: read-only, cite it, never edit or move it |
 
@@ -58,6 +59,7 @@ The table is an index; step 3 requires the directory listing.
 | Change behavior that has weak or missing tests | [[AGENT__procedure__pin-the-behavior-before-you-change-it]] |
 | Change a shared API, schema, configuration, wire format or parser | [[AGENT__procedure__know-what-else-uses-it]] |
 | Edit unfamiliar legacy code without rewriting it | [[AGENT__procedure__make-the-smallest-diff-that-works]] |
+| Start or restructure a fork | [[AGENT__procedure__fork-an-open-source-project]] |
 | Reconcile a fork with its upstream | [[AGENT__procedure__keep-the-fork-in-sync]] |
 | Change or migrate a public contract | [[AGENT__procedure__change-it-without-breaking-callers]] |
 | Touch deployment, infrastructure, or anything on the path to production | [[AGENT__procedure__check-before-you-ship]] |
@@ -66,7 +68,7 @@ The table is an index; step 3 requires the directory listing.
 
 Knowledge files are named `TYPE__conclusion-or-topic.md`. The title (first `#` heading) equals the filename stem. Link with `[[filename]]`; targets must be unique in the repository.
 
-Allowed types: `AGENT` (controls agent behavior), `ADR`, `FEATURE`, `API`, `DATA`, `OPS`, `SEQUENCE`, `STATE`, `DATAFLOW`, `MODULE`, `SUMMARY` (journal compaction output), `SOURCE` (one evidence source), `RESEARCH` (one investigation), `REPORT` (reader-facing long-form deliverable), `TASK` (one active work claim), `TOOLS` (external tool registry). Adding a type is a decision: ask first.
+Allowed types: `AGENT` (controls agent behavior), `ADR`, `FEATURE`, `API`, `DATA`, `OPS`, `SEQUENCE`, `STATE`, `DATAFLOW`, `MODULE`, `SUMMARY` (journal compaction output), `SOURCE` (one evidence source), `RESEARCH` (one investigation), `REPORT` (reader-facing long-form deliverable), `TASK` (one active work claim), `TOOLS` (external tool registry), `FORK` (upstream baseline, license, patch inventory, sync policy). Adding a type is a decision: ask first.
 
 A name must never mislead someone who only sees the listing. Prefer conclusions over topics: `ADR__use-postgres-for-jsonb` beats `ADR__database-choice`. Negative conclusions are valuable: `ADR__do-not-use-orm`.
 

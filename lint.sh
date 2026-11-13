@@ -104,6 +104,19 @@ check_tool_field() {
   fi
 }
 
+check_fork_field() {
+  local file="$1" display="$2" pattern="$3" label="$4" count
+  count="$(grep -cE "$pattern" "$file" || true)"
+  [ -n "$count" ] || count=0
+  if [ "$count" -ne 1 ]; then
+    err "L16-fork-record" "$display" "expected exactly one ${label}"
+  fi
+}
+
+trim() {
+  printf '%s' "$1" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' -e 's/^`*//' -e 's/`*$//'
+}
+
 # Strip fenced code blocks (tracking backtick-run length so nested fences work)
 # and inline code spans, then print bare [[links]].
 extract_links() {
@@ -196,7 +209,7 @@ EOF
   # L8: unknown type prefix.
   type="$(printf '%s' "$stem" | sed -nE 's/^([0-9]{2}__)?([A-Z][A-Z0-9]*)__.*/\2/p')"
   if [ -n "$type" ]; then
-    case " AGENT ADR FEATURE API DATA OPS SEQUENCE STATE DATAFLOW MODULE SUMMARY SOURCE RESEARCH REPORT TASK TOOLS " in
+    case " AGENT ADR FEATURE API DATA OPS SEQUENCE STATE DATAFLOW MODULE SUMMARY SOURCE RESEARCH REPORT TASK TOOLS FORK " in
       *" $type "*) ;;
       *) warn "L8-unknown-type" "$display" "unknown type prefix '$type' (see allowed types in 00__AGENT__START_HERE.md)" ;;
     esac
@@ -248,6 +261,127 @@ EOF
       if [ "$status_count" -ne 1 ] || [ "$owner_count" -ne 1 ] || [ "$branch_count" -ne 1 ] || [ "$scope_count" -ne 1 ] || [ "$started_count" -ne 1 ]; then
         err "L12-task-claim" "$display" "expected exactly one '- Status: active|blocked|done', '- Owner:', '- Branch:', '- Scope:' and '- Started: YYYY-MM-DD'"
       fi
+      ;;
+  esac
+
+  # L16: fork records pin the upstream baseline and keep a valid patch ledger.
+  case "$stem" in
+    FORK__*)
+      check_fork_field "$file" "$display" '^- Upstream: .+$' "'- Upstream:'"
+      check_fork_field "$file" "$display" '^- Upstream ref: .+$' "'- Upstream ref:'"
+      check_fork_field "$file" "$display" '^- Upstream status: (active|successor|archived)$' "'- Upstream status: active|successor|archived'"
+      check_fork_field "$file" "$display" '^- Successor: .+$' "'- Successor:'"
+      check_fork_field "$file" "$display" '^- License: .+$' "'- License:'"
+      check_fork_field "$file" "$display" '^- Fork model: (patch-stack|periodic-merge|hard-fork|successor-tracking)$' "'- Fork model: patch-stack|periodic-merge|hard-fork|successor-tracking'"
+      check_fork_field "$file" "$display" '^- Local release: (none|v?[0-9]+(\.[0-9]+){1,3}([-+][0-9A-Za-z.-]+)?)$' "'- Local release: none or a version'"
+      check_fork_field "$file" "$display" '^- Last synced: ([0-9]{4}-[0-9]{2}-[0-9]{2}|never)$' "'- Last synced: YYYY-MM-DD or never'"
+      check_fork_field "$file" "$display" '^- Sync cadence: .+$' "'- Sync cadence:'"
+      check_fork_field "$file" "$display" '^- Revisit when: .+$' "'- Revisit when:'"
+
+      upstream="$(sed -nE 's/^- Upstream: (.*)$/\1/p' "$file" | head -n 1)"
+      upstream_ref="$(sed -nE 's/^- Upstream ref: (.*)$/\1/p' "$file" | head -n 1)"
+      upstream_status="$(sed -nE 's/^- Upstream status: (.*)$/\1/p' "$file" | head -n 1)"
+      successor="$(sed -nE 's/^- Successor: (.*)$/\1/p' "$file" | head -n 1)"
+      license="$(sed -nE 's/^- License: (.*)$/\1/p' "$file" | head -n 1)"
+      fork_model="$(sed -nE 's/^- Fork model: (.*)$/\1/p' "$file" | head -n 1)"
+      sync_cadence="$(sed -nE 's/^- Sync cadence: (.*)$/\1/p' "$file" | head -n 1)"
+      revisit_when="$(sed -nE 's/^- Revisit when: (.*)$/\1/p' "$file" | head -n 1)"
+      upstream="$(trim "$upstream")"
+      upstream_ref="$(trim "$upstream_ref")"
+      upstream_status="$(trim "$upstream_status")"
+      successor="$(trim "$successor")"
+      license="$(trim "$license")"
+      fork_model="$(trim "$fork_model")"
+      sync_cadence="$(trim "$sync_cadence")"
+      revisit_when="$(trim "$revisit_when")"
+
+      if [ -n "$upstream" ] && ! printf '%s' "$upstream" | grep -qE '^(https?://[^[:space:]]+|git://[^[:space:]]+|git@[^[:space:]]+|ssh://[^[:space:]]+)$'; then
+        err "L16-fork-record" "$display" "'- Upstream:' must be a URL or Git remote, not '${upstream}'"
+      elif [ -n "$upstream" ] && printf '%s' "$upstream" | grep -qiE '^https?://(www\.)?example\.(com|org|net)(/|$)'; then
+        err "L16-fork-record" "$display" "'- Upstream:' still points at an example host; record the real repository"
+      fi
+      if [ -n "$upstream_ref" ] && ! printf '%s' "$upstream_ref" | grep -qE '^(v?[0-9]+(\.[0-9]+){1,3}([-+][0-9A-Za-z.-]+)?|[0-9a-fA-F]{40})$'; then
+        err "L16-fork-record" "$display" "'- Upstream ref:' must be a version tag or a full 40-character commit SHA, not '${upstream_ref}'"
+      fi
+      if [ -n "$license" ] && printf '%s' "$license" | grep -qiE '^(unknown|tbd|n/?a|none|spdx identifier|\?)$'; then
+        err "L16-fork-record" "$display" "'- License:' must name the reviewed license, not '${license}'"
+      fi
+      if [ -n "$sync_cadence" ] && printf '%s' "$sync_cadence" | grep -qiE '^(unknown|tbd|\?)$'; then
+        err "L16-fork-record" "$display" "'- Sync cadence:' must be concrete, not '${sync_cadence}'"
+      fi
+      if [ -n "$revisit_when" ] && printf '%s' "$revisit_when" | grep -qiE '^(unknown|tbd|\?)$'; then
+        err "L16-fork-record" "$display" "'- Revisit when:' must be concrete, not '${revisit_when}'"
+      fi
+      if [ "$upstream_status" = "successor" ] && { [ -z "$successor" ] || printf '%s' "$successor" | grep -qiE '^(none|-)$'; }; then
+        err "L16-fork-record" "$display" "'- Upstream status: successor' requires a named '- Successor:'"
+      fi
+      if [ "$upstream_status" = "archived" ] && { [ "$fork_model" = "patch-stack" ] || [ "$fork_model" = "periodic-merge" ]; }; then
+        err "L16-fork-record" "$display" "an archived upstream cannot use Fork model '${fork_model}'; use hard-fork or successor-tracking"
+      fi
+      if [ "$fork_model" = "successor-tracking" ] && [ "$upstream_status" != "successor" ] && [ "$upstream_status" != "archived" ]; then
+        err "L16-fork-record" "$display" "'Fork model: successor-tracking' requires Upstream status 'successor' or 'archived'"
+      fi
+      if [ "$fork_model" = "successor-tracking" ] && { [ -z "$successor" ] || printf '%s' "$successor" | grep -qiE '^(none|-)$'; }; then
+        err "L16-fork-record" "$display" "'Fork model: successor-tracking' requires a named '- Successor:'"
+      fi
+      if printf '%s' "$successor" | grep -qiE '^https?://(www\.)?example\.(com|org|net)(/|$)'; then
+        err "L16-fork-record" "$display" "'- Successor:' still points at an example host; record the real repository or 'none'"
+      fi
+
+      if ! grep -qE '^## Local patch inventory$' "$file"; then
+        err "L16-fork-record" "$display" "missing '## Local patch inventory' section"
+      fi
+      patch_section="$(awk '
+        /^## Local patch inventory[[:space:]]*$/ { in_section = 1; next }
+        in_section && /^## / { exit }
+        in_section { print }
+      ' "$file")"
+      while IFS= read -r patch_row; do
+        case "$patch_row" in
+          \|*) ;;
+          *) continue ;;
+        esac
+        body="${patch_row#|}"
+        body="${body%|}"
+        IFS='|' read -r p1 p2 p3 p4 p5 p6 p7 p8 <<EOF
+$body
+EOF
+        p1="$(trim "$p1")"
+        p2="$(trim "$p2")"
+        p3="$(trim "$p3")"
+        p4="$(trim "$p4")"
+        p5="$(trim "$p5")"
+        p6="$(trim "$p6")"
+        p7="$(trim "$p7")"
+        p8="$(trim "$p8")"
+        case "$p1" in
+          Patch|'---'|:---*|'---:'*) continue ;;
+        esac
+        if [ -n "$p8" ]; then
+          err "L16-fork-record" "$display" "patch '${p1:-?}': expected 7 columns, found more"
+          continue
+        fi
+        if [ -z "$p1" ]; then
+          err "L16-fork-record" "$display" "patch row has an empty patch id"
+          continue
+        fi
+        case "$p1" in
+          \<*\>*) err "L16-fork-record" "$display" "patch '${p1}': replace the placeholder patch id" ;;
+        esac
+        if ! printf '%s' "$p2" | grep -qE '^[0-9a-fA-F]{7,40}$'; then
+          err "L16-fork-record" "$display" "patch '${p1}': '- Local commit' must be a 7-40 character commit SHA, found '${p2}'"
+        fi
+        [ -n "$p3" ] || err "L16-fork-record" "$display" "patch '${p1}': missing upstream provenance in the Upstream provenance column"
+        [ -n "$p4" ] || err "L16-fork-record" "$display" "patch '${p1}': missing reason in the Why column"
+        [ -n "$p5" ] || err "L16-fork-record" "$display" "patch '${p1}': missing surface in the Surface column"
+        [ -n "$p6" ] || err "L16-fork-record" "$display" "patch '${p1}': missing test in the Test column"
+        case "$p7" in
+          active|upstreamed|obsolete|blocked) ;;
+          *) err "L16-fork-record" "$display" "patch '${p1}': Status must be active|upstreamed|obsolete|blocked, found '${p7}'" ;;
+        esac
+      done <<EOF
+$patch_section
+EOF
       ;;
   esac
 

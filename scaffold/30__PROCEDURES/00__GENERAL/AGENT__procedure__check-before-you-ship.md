@@ -25,6 +25,19 @@ Before closing a readiness review, check `secure.deps` and `secure.secrets` in `
 | Observability | Errors are logged with context; a human is notified when production fails |
 | Dependencies | A way to see and apply security updates |
 | Access | Who can deploy and who can read production data is known and minimal |
+| Fork (only if derived) | Upstream baseline, license obligations, patch inventory, and release identity are recorded in `FORK__<upstream>` |
+
+## Publishing a fork or derived artifact
+
+If this project derives from another repository, read `FORK__<upstream>` and [[AGENT__procedure__keep-the-fork-in-sync]] before publishing. Confirm:
+
+- The version identifies both the upstream baseline and the fork revision.
+- License and notice files ship with the artifact; redistribution and source-availability obligations are met, especially under GPL/AGPL.
+- Binaries have checksums or signatures, and a source archive or written source offer accompanies them where required.
+- The changelog separates upstream changes from local patches, and the upgrade path from the previous fork release has been exercised.
+- A security advisory watch exists. If the upstream is archived, a named owner handles dependency and CVE response.
+
+A license change, a missing notice, or an unidentified upstream baseline is a stop-and-ask event, not a release risk to note and defer.
 
 ## Rules that apply regardless of mode
 

@@ -17,7 +17,7 @@ The installer only adds missing files and never overwrites. An upgrade therefore
 The first line of the target `00__AGENT__START_HERE.md` carries the version marker:
 
 ```text
-<!-- agent-coldstart-scaffold entry v7.5.0 -->
+<!-- agent-coldstart-scaffold entry v7.6.0 -->
 ```
 
 The version in that marker is the installed version.
@@ -162,6 +162,20 @@ This release renames procedure files. It is a breaking change for `[[links]]` an
 - Delete the old procedure files only after all links and path references are migrated. `legacy-paths.txt` lists them; the installer will warn until they are removed.
 - The entry marker changes to `v7.0.0`.
 - Renamed files are not automatically deleted by the installer.
+
+### 7.5.0 → 7.6.0
+
+- New procedure `30__PROCEDURES/20__TAKING_OVER_A_LEGACY_PROJECT/AGENT__procedure__fork-an-open-source-project.md`; the installer adds it automatically.
+- New optional template `templates/fork/_TEMPLATE__FORK.md` in the source repository; it is not installed by default. Copy it when the project is a fork.
+- Merge `00__AGENT__START_HERE.md`: the type table gains `FORK`, and the trigger table gains "Start or restructure a fork".
+- Merge `10__ALWAYS_LOAD/AGENT__rules.md`: a fork or upstream reference now requires both fork procedures, not only `keep-the-fork-in-sync`.
+- Merge `20__PROJECT_CONTEXT/project_conventions.md`: add the "Fork and upstream" section. The installer will not overwrite this file.
+- Merge `AGENT__procedure__keep-the-fork-in-sync.md` and `AGENT__procedure__check-before-you-ship.md`.
+- Merge the fork pointer in `AGENT__procedure__map-the-existing-system-first.md` and `AGENT__procedure__first-day-on-the-project.md`.
+- If the project is already a fork, create `FORK__<upstream>.md` from the template before the next upstream sync. Record the pinned baseline, license, patch inventory, and release identity.
+- `lint` adds `L16-fork-record`. Run it after creating the record and fix every reported field; an archived upstream cannot use `patch-stack` or `periodic-merge`.
+- The entry marker changes to `v7.6.0`.
+- No installed asset was removed or renamed.
 
 ### 7.4.0 → 7.5.0
 

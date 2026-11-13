@@ -8,7 +8,7 @@ Priorities:
 
 - First: identify entry points, runtime processes, data flow, external contracts, storage, configuration, and background jobs. Show how these pieces connect rather than listing them in isolation.
 - Next: give the build, test, and deployment commands with their source in the repository. Along the relevant code path, inspect recent commits, reverted fixes, related PRs, and blame hotspots; distinguish an intentional historical workaround from a response to an incident only when evidence supports that distinction.
-- Then: record code ownership, support boundaries, and known hazards. If this is a fork, identify the upstream baseline and local divergence; use [[AGENT__procedure__keep-the-fork-in-sync]] when reconciling changes.
+- Then: record code ownership, support boundaries, and known hazards. If this is a fork, identify the upstream baseline, local divergence, license, and patch inventory; create or update `FORK__<upstream>` with [[AGENT__procedure__fork-an-open-source-project]], and use [[AGENT__procedure__keep-the-fork-in-sync]] when reconciling changes.
 
 Build the account around the path from an incoming trigger to its effects and outputs. Cite files, symbols, configuration, commits, or PRs for consequential claims. Mark unsupported claims `[unverified]` and state the next observation needed to resolve each one. If repository access or execution is unavailable, identify the evidence needed rather than inventing findings or commands.
 

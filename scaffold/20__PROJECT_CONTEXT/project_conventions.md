@@ -22,6 +22,14 @@
 - Commit style: unknown (e.g., Conventional Commits)
 - Does the agent commit without being asked: no
 
+## Fork and upstream
+
+- Applies only when this project derives from another repository.
+- Fork record: `FORK__<upstream>.md`; procedure: [[AGENT__procedure__fork-an-open-source-project]].
+- `upstream` is read-only; `origin` is the fork.
+- Release identity names the upstream baseline, for example `v1.2.3-fork.1`.
+- License and notice obligations: unknown
+
 ## Collaboration
 
 - Default mode (see [[AGENT__collaboration]]): Autopilot
